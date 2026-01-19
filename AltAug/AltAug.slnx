@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../AltAug.UI/AltAug.UI.csproj" />
+  <Project Path="AltAug.csproj" />
+</Solution>
