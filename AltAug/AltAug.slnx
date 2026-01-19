@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="../AltAug.Domain/AltAug.Domain.csproj" Id="0b0a537d-787e-446c-9030-f375b041ef6f" />
   <Project Path="../AltAug.UI/AltAug.UI.csproj" />
   <Project Path="AltAug.csproj" />
 </Solution>

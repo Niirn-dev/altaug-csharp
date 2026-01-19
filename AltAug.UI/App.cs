@@ -1,6 +1,6 @@
-﻿using AltAug.UI.Extensions;
+﻿using AltAug.Domain;
+using AltAug.UI.Extensions;
 using AltAug.UI.Interfaces;
-using AltAug.UI.Views;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -8,12 +8,15 @@ using Avalonia.Layout;
 using Avalonia.Styling;
 using FluentAvalonia.Styling;
 using FluentAvalonia.UI.Windowing;
+using Microsoft.Extensions.DependencyInjection;
 using MoreLinq;
 
 namespace AltAug.UI;
 
-public sealed class App : Application
+internal sealed class App(IServiceProvider serviceProvider) : Application
 {
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
+
     public override void Initialize()
     {
         Styles.Add(new FluentAvaloniaTheme());
@@ -25,7 +28,7 @@ public sealed class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow();
+           desktop.MainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -34,8 +37,12 @@ public sealed class App : Application
 
 internal sealed class MainWindow : AppWindow
 {
-    public MainWindow()
+    private readonly StateManager _stateManager;
+
+    public MainWindow(IEnumerable<IView> views, StateManager stateManager)
     {
+        _stateManager = stateManager;
+
         Title = "Alt-Aug C# Edition";
         Width = 800;
         Height = 600;
@@ -45,15 +52,8 @@ internal sealed class MainWindow : AppWindow
             Margin = new Thickness(10)
         };
 
-        object[] views =
-        [
-            new ConfigurationView(),
-            new CraftingView(),
-            new LoggingView(),
-        ];
-
-        views
-            .Interleave(Enumerable.Range(0, views.Length - 1).Select(_ => new Separator { Margin = new Thickness(0, 10, 0, 10) }))
+        views.Cast<object>()
+            .Interleave(Enumerable.Range(0, views.Count() - 1).Select(_ => new Separator { Margin = new Thickness(0, 10, 0, 10) }))
             .ForEach(item =>
             {
                 if (item is IView view)

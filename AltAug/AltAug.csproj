@@ -18,10 +18,13 @@
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" Version="11.2.5" />
     <PackageReference Include="FluentAvaloniaUI" Version="2.4.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
     <PackageReference Include="NetAutoGUI" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AltAug.Domain\AltAug.Domain.csproj" />
     <ProjectReference Include="..\AltAug.UI\AltAug.UI.csproj" />
   </ItemGroup>
 
