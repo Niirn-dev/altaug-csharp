@@ -1,20 +1,20 @@
 ﻿namespace AltAug.Domain.Models;
 
-public record struct AppConfig(
+public readonly record struct AppConfig(
     CoordinatesConfig CoordinatesConfig,
     AutomationConfig AutomationConfig,
     CraftingConfig CraftingConfig)
 {
     public static AppConfig DefaultInstance { get; } = new(
         new(
-            Item: new(0m, 0m),
-            MapTopLeft: new(0m, 0m),
-            MapBottomRight: new(0m, 0m),
-            Alteration: new(0m, 0m),
-            Augmentation: new(0m, 0m),
-            Alchemy: new(0m, 0m),
-            Scour: new(0m, 0m),
-            Chaos: new(0m, 0m)
+            Item: new(0, 0),
+            MapTopLeft: new(0, 0),
+            MapBottomRight: new(0, 0),
+            Alteration: new(0, 0),
+            Augmentation: new(0, 0),
+            Alchemy: new(0, 0),
+            Scour: new(0, 0),
+            Chaos: new(0, 0)
         ),
         new(
             AutoGuiPause: 0.05m,
@@ -34,8 +34,21 @@ public record struct CoordinatesConfig(
     Point Scour,
     Point Chaos);
 
-public record struct Point(decimal X, decimal Y);
+public readonly record struct Point(double X, double Y)
+{
+    public static Point operator +(Point left, Point right) => new(
+        X: left.X + right.X,
+        Y: left.Y + right.Y);
 
-public record struct AutomationConfig(decimal AutoGuiPause, bool EnablePerfLogging);
+    public static Point operator -(Point left, Point right) => new(
+        X: left.X - right.X,
+        Y: left.Y - right.Y);
 
-public record struct CraftingConfig();
+    public static Point operator /(Point left, double right) => new(
+        X: left.X / right,
+        Y: left.Y / right);
+}
+
+public readonly record struct AutomationConfig(decimal AutoGuiPause, bool EnablePerfLogging);
+
+public readonly record struct CraftingConfig();

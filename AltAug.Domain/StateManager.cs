@@ -1,10 +1,11 @@
-﻿using AltAug.Domain.Models;
+﻿using AltAug.Domain.Interfaces;
+using AltAug.Domain.Models;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
 namespace AltAug.Domain;
 
-public sealed class StateManager
+public sealed class StateManager : IStateManager
 {
     private const string ConfigFilePath = "config.yaml";
 

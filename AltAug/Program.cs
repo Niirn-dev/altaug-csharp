@@ -1,6 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using AltAug.Domain;
 using AltAug.Domain.Extensions;
+using AltAug.Domain.Interfaces;
 using AltAug.UI;
 using AltAug.UI.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +14,7 @@ using var host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 
-var stateManager = host.Services.GetRequiredService<StateManager>();
+var stateManager = host.Services.GetRequiredService<IStateManager>();
 
 Console.WriteLine("Starting GUI...");
 
