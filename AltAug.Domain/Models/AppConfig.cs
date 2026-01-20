@@ -49,6 +49,6 @@ public readonly record struct Point(double X, double Y)
         Y: left.Y / right);
 }
 
-public readonly record struct AutomationConfig(decimal AutoGuiPause, bool EnablePerfLogging);
+public readonly record struct AutomationConfig(double AutoGuiPause, bool EnablePerfLogging);
 
 public readonly record struct CraftingConfig();
