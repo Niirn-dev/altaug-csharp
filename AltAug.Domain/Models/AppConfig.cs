@@ -25,26 +25,26 @@ public readonly record struct AppConfig(
 }
 
 public record struct CoordinatesConfig(
-    Point Item,
-    Point MapTopLeft,
-    Point MapBottomRight,
-    Point Alteration,
-    Point Augmentation,
-    Point Alchemy,
-    Point Scour,
-    Point Chaos);
+    Vec2 Item,
+    Vec2 MapTopLeft,
+    Vec2 MapBottomRight,
+    Vec2 Alteration,
+    Vec2 Augmentation,
+    Vec2 Alchemy,
+    Vec2 Scour,
+    Vec2 Chaos);
 
-public readonly record struct Point(double X, double Y)
+public readonly record struct Vec2(double X, double Y)
 {
-    public static Point operator +(Point left, Point right) => new(
+    public static Vec2 operator +(Vec2 left, Vec2 right) => new(
         X: left.X + right.X,
         Y: left.Y + right.Y);
 
-    public static Point operator -(Point left, Point right) => new(
+    public static Vec2 operator -(Vec2 left, Vec2 right) => new(
         X: left.X - right.X,
         Y: left.Y - right.Y);
 
-    public static Point operator /(Point left, double right) => new(
+    public static Vec2 operator /(Vec2 left, double right) => new(
         X: left.X / right,
         Y: left.Y / right);
 }

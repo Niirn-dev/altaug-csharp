@@ -8,8 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <AvaloniaResource Include="Assets\alch_orb.png" />
+    <AvaloniaResource Include="Assets\alt_orb.png" />
+    <AvaloniaResource Include="Assets\aug_orb.png" />
+    <AvaloniaResource Include="Assets\bow_item.png" />
+    <AvaloniaResource Include="Assets\chaos_orb.png" />
+    <AvaloniaResource Include="Assets\map.png" />
+    <AvaloniaResource Include="Assets\scour_orb.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" Version="11.2.5" />
     <PackageReference Include="FluentAvaloniaUI" Version="2.4.1" />
+    <PackageReference Include="LanguageExt.Core" Version="4.4.9" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
     <PackageReference Include="morelinq" Version="4.4.0" />
   </ItemGroup>

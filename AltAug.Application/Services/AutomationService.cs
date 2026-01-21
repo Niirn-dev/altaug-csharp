@@ -14,7 +14,7 @@ internal sealed class AutomationService(IStateManager stateManager) : IAutomatio
 {
     private readonly IStateManager _stateManager = stateManager;
 
-    public Option<Point> RecordMousePosition(int pollRate = 20, int failsafeTimeoutSeconds = 10)
+    public Option<Vec2> RecordMousePosition(int pollRate = 20, int failsafeTimeoutSeconds = 10)
     {
         InputSimulator inputSimulator = new();
 
@@ -24,12 +24,12 @@ internal sealed class AutomationService(IStateManager stateManager) : IAutomatio
                 return WindowsNativeHelper.GetCursorPosition();
 
             if (inputSimulator.InputDeviceState.IsAnyHardwareKeyDown([VirtualKeyCode.VK_Q, VirtualKeyCode.ESCAPE]))
-                return Option<Point>.None;
+                return Option<Vec2>.None;
 
             Thread.Sleep(TimeSpan.FromSeconds(1.0 / pollRate));
         }
 
-        return Option<Point>.None;
+        return Option<Vec2>.None;
     }
 
     public string GetItemDescription(ItemLocation location, Option<int> inventoryPosition)

@@ -43,7 +43,7 @@ internal static class InputSimulatorExtensions
 
     public static IMouseSimulator HoverInventoryItem(this IMouseSimulator that, AppConfig appConfig, int inventoryPosition)
     {
-        static Point CalculateInventoryPosition(AppConfig appConfig, int inventoryPosition)
+        static Vec2 CalculateInventoryPosition(AppConfig appConfig, int inventoryPosition)
         {
             var coordinates = appConfig.CoordinatesConfig;
             var mapPosition = (coordinates.MapTopLeft + coordinates.MapBottomRight) / 2;
@@ -51,7 +51,7 @@ internal static class InputSimulatorExtensions
 
             var row = inventoryPosition % InventoryRowCount;
             var col = inventoryPosition / InventoryRowCount;
-            Point delta = new(X: step.X * col, Y: step.Y * row);
+            Vec2 delta = new(X: step.X * col, Y: step.Y * row);
 
             return mapPosition + delta;
         }
@@ -60,7 +60,7 @@ internal static class InputSimulatorExtensions
             .MoveMouseTo(CalculateInventoryPosition(appConfig, inventoryPosition));
     }
 
-    public static IMouseSimulator MoveMouseTo(this IMouseSimulator that, Point point) => that
+    public static IMouseSimulator MoveMouseTo(this IMouseSimulator that, Vec2 point) => that
         .MoveMouseTo(point.X, point.Y);
 
     public static bool IsAnyHardwareKeyDown(this IInputDeviceStateAdaptor that, VirtualKeyCode[] keys) => keys

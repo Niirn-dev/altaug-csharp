@@ -1,15 +1,23 @@
 ﻿using AltAug.Domain.Interfaces;
+using AltAug.Domain.Models;
 using AltAug.UI.Interfaces;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
+using LanguageExt;
 using MoreLinq;
 
 namespace AltAug.UI.Views;
 
 internal sealed class ConfigurationView : IView
 {
+    private const int ConfigurationButtonSingleRowHeight = 61;
+    private const int ConfigurationButtonDoubleRowHeight = 126;
+    private const int ConfigurationButtonWidth = 63;
+
     private readonly StackPanel _root;
     private readonly IStateManager _stateManager;
     private readonly IAutomationService _automationService;
@@ -43,16 +51,36 @@ internal sealed class ConfigurationView : IView
             Margin = new Thickness(10),
             
         };
-        configButtonsStack.Children.Add(GetItemButton());
+        configButtonsStack.Children.Add(
+            MakeDoubleRowConfigBtn(
+                "avares://AltAug.UI/Assets/bow_item.png",
+                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Item = point } }
+            )
+        );
 
         Button[] doubledButtons =
         [
-            new() { Content = "Alt", Height =  61, Width = 63, Margin = new Thickness(2) },
-            new() { Content = "Alch", Height =  61, Width = 63, Margin = new Thickness(2) },
-            new() { Content = "Aug", Height =  61, Width = 63, Margin = new Thickness(2) },
-            new() { Content = "Scr", Height =  61, Width = 63, Margin = new Thickness(2) },
-            new() { Content = "Chs", Height =  61, Width = 63, Margin = new Thickness(2) },
-            new() { Content = "Map", Height =  61, Width = 63, Margin = new Thickness(2) },
+            MakeSingleRowConfigBtn(
+                "avares://AltAug.UI/Assets/alt_orb.png",
+                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Alteration = point } }
+            ),
+            MakeSingleRowConfigBtn(
+                "avares://AltAug.UI/Assets/alch_orb.png",
+                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Alchemy = point } }
+            ),
+            MakeSingleRowConfigBtn(
+                "avares://AltAug.UI/Assets/aug_orb.png",
+                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Augmentation = point } }
+            ),
+            MakeSingleRowConfigBtn(
+                "avares://AltAug.UI/Assets/scour_orb.png",
+                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Scour = point } }
+            ),
+            MakeSingleRowConfigBtn(
+                "avares://AltAug.UI/Assets/chaos_orb.png",
+                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Chaos = point } }
+            ),
+            MakeMapConfigurationBtn(),
         ];
         doubledButtons.Batch(2).Select(buttons =>
             {
@@ -100,13 +128,76 @@ internal sealed class ConfigurationView : IView
         root.Add(_root);
     }
 
-    private Button GetItemButton()
+    private Button MakeMapConfigurationBtn()
     {
+        var uri = new Uri("avares://AltAug.UI/Assets/map.png");
+        var bitmap = new Bitmap(AssetLoader.Open(uri));
+
         var btn = new Button
         {
-            Content = "TH",
-            Height = 126,
-            Width = 68,
+            Content = new Image
+            {
+                Source = bitmap,
+                Stretch = Stretch.Uniform,
+            },
+            Height = ConfigurationButtonSingleRowHeight,
+            Width = ConfigurationButtonWidth,
+            Margin = new Thickness(2),
+            Padding = new Thickness(0),
+        };
+
+        btn.Click += (src, args) =>
+        {
+            _automationService.RecordMousePosition().Match(
+                point =>
+                {
+                    Console.WriteLine($"Recorded mouse cursor position with (x, y): ({point.X}, {point.Y}).");
+                    _stateManager.Update(cfg => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { MapTopLeft = point } });
+                },
+                () => Console.WriteLine("The mouse cursor position wasn't recorded.")
+            );
+
+            _automationService.RecordMousePosition().Match(
+                point =>
+                {
+                    Console.WriteLine($"Recorded mouse cursor position with (x, y): ({point.X}, {point.Y}).");
+                    _stateManager.Update(cfg => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { MapBottomRight = point } });
+                },
+                () => Console.WriteLine("The mouse cursor position wasn't recorded.")
+            );
+        };
+
+        return btn;
+    }
+
+    private Button MakeDoubleRowConfigBtn(string content, Func<AppConfig, Vec2, AppConfig> configUpdater) => MakeConfigurationButton(
+        content,
+        height: ConfigurationButtonDoubleRowHeight,
+        width: ConfigurationButtonWidth,
+        configUpdater);
+
+    private Button MakeSingleRowConfigBtn(string content, Func<AppConfig, Vec2, AppConfig> configUpdater) => MakeConfigurationButton(
+        content,
+        height: ConfigurationButtonSingleRowHeight,
+        width: ConfigurationButtonWidth,
+        configUpdater);
+
+    private Button MakeConfigurationButton(string content, int height, int width, Func<AppConfig, Vec2, AppConfig> configUpdater)
+    {
+        var uri = new Uri(content);
+        var bitmap = new Bitmap(AssetLoader.Open(uri));
+
+        var btn = new Button
+        {
+            Content = new Image
+            {
+                Source = bitmap,
+                Stretch = Stretch.Uniform,
+            },
+            Height = height,
+            Width = width,
+            Margin = new Thickness(2),
+            Padding = new Thickness(0),
         };
 
         btn.Click += (src, args) =>
@@ -116,13 +207,7 @@ internal sealed class ConfigurationView : IView
                 point =>
                 {
                     Console.WriteLine($"Recorded mouse cursor position with (x, y): ({point.X}, {point.Y}).");
-                    _stateManager.Update(cfg => cfg with
-                    {
-                        CoordinatesConfig = cfg.CoordinatesConfig with
-                        {
-                            Item = point,
-                        }
-                    });
+                    _stateManager.Update(cfg => configUpdater(cfg, point));
                 },
                 () => Console.WriteLine("The mouse cursor position wasn't recorded.")
             );

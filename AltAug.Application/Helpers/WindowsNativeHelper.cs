@@ -6,9 +6,9 @@ namespace AltAug.Application.Helpers;
 
 internal static class WindowsNativeHelper
 {
-    public static Option<Point> GetCursorPosition() => GetCursorPos(out var p)
-        ? new Point(p.X, p.Y)
-        : Option<Point>.None;
+    public static Option<Vec2> GetCursorPosition() => GetCursorPos(out var p)
+        ? new Vec2(p.X, p.Y)
+        : Option<Vec2>.None;
 
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
