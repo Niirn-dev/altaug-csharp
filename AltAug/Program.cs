@@ -1,4 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using AltAug.Application.Extensions;
 using AltAug.Domain.Extensions;
 using AltAug.Domain.Interfaces;
 using AltAug.UI;
@@ -9,8 +10,9 @@ using Microsoft.Extensions.Hosting;
 using var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((ctx, services) =>
     {
-        services.RegisterDomainServices();
-        services.RegisterUIServices();
+        services.RegisterDomainServices()
+            .RegisterApplicationServices()
+            .RegisterUIServices();
     })
     .Build();
 

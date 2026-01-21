@@ -1,6 +1,8 @@
 ﻿using AltAug.Application.Extensions;
+using AltAug.Application.Helpers;
 using AltAug.Application.Wrappers;
 using AltAug.Domain.Interfaces;
+using AltAug.Domain.Models;
 using AltAug.Domain.Models.Enums;
 using LanguageExt;
 using TextCopy;
@@ -11,6 +13,24 @@ namespace AltAug.Application.Services;
 internal sealed class AutomationService(IStateManager stateManager) : IAutomationService
 {
     private readonly IStateManager _stateManager = stateManager;
+
+    public Option<Point> RecordMousePosition(int pollRate = 20, int failsafeTimeoutSeconds = 10)
+    {
+        InputSimulator inputSimulator = new();
+
+        foreach (var _ in Enumerable.Range(0, pollRate * failsafeTimeoutSeconds))
+        {
+            if (inputSimulator.InputDeviceState.IsHardwareKeyDown(VirtualKeyCode.VK_E))
+                return WindowsNativeHelper.GetCursorPosition();
+
+            if (inputSimulator.InputDeviceState.IsAnyHardwareKeyDown([VirtualKeyCode.VK_Q, VirtualKeyCode.ESCAPE]))
+                return Option<Point>.None;
+
+            Thread.Sleep(TimeSpan.FromSeconds(1.0 / pollRate));
+        }
+
+        return Option<Point>.None;
+    }
 
     public string GetItemDescription(ItemLocation location, Option<int> inventoryPosition)
     {

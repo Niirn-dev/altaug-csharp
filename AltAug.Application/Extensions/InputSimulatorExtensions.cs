@@ -9,9 +9,10 @@ internal static class InputSimulatorExtensions
 {
     private const int InventoryRowCount = 5;
 
-    public static IMouseSimulator HoverItem(this IMouseSimulator that, AppConfig appConfig, ItemLocation location, Option<int> inventoryPosition)
-    {
-        return location switch
+    public static IMouseSimulator HoverItem(this IMouseSimulator that,
+        AppConfig appConfig,
+        ItemLocation location,
+        Option<int> inventoryPosition) => location switch
         {
             ItemLocation.CurrencyTab => that.HoverCurrencyTabItem(appConfig),
             ItemLocation.Inventory => inventoryPosition
@@ -21,7 +22,6 @@ internal static class InputSimulatorExtensions
                 ),
             _ => throw new ArgumentException($"Unsupported {nameof(location)} enum value."),
         };
-    }
 
     public static IMouseSimulator HoverCurrency(this IMouseSimulator that, AppConfig appConfig, CurrencyOrb orb)
     {
@@ -62,4 +62,7 @@ internal static class InputSimulatorExtensions
 
     public static IMouseSimulator MoveMouseTo(this IMouseSimulator that, Point point) => that
         .MoveMouseTo(point.X, point.Y);
+
+    public static bool IsAnyHardwareKeyDown(this IInputDeviceStateAdaptor that, VirtualKeyCode[] keys) => keys
+        .Any(that.IsHardwareKeyDown);
 }

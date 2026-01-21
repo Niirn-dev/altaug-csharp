@@ -1,4 +1,5 @@
-﻿using AltAug.UI.Interfaces;
+﻿using AltAug.Domain.Interfaces;
+using AltAug.UI.Interfaces;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
@@ -10,9 +11,14 @@ namespace AltAug.UI.Views;
 internal sealed class ConfigurationView : IView
 {
     private readonly StackPanel _root;
+    private readonly IStateManager _stateManager;
+    private readonly IAutomationService _automationService;
 
-    public ConfigurationView()
+    public ConfigurationView(IStateManager stateManager, IAutomationService automationService)
     {
+        _stateManager = stateManager;
+        _automationService = automationService;
+
         _root = new StackPanel
         {
             Orientation = Orientation.Vertical,
@@ -37,12 +43,7 @@ internal sealed class ConfigurationView : IView
             Margin = new Thickness(10),
             
         };
-        configButtonsStack.Children.Add(new Button
-        {
-            Content = "TH",
-            Height = 126,
-            Width = 68,
-        });
+        configButtonsStack.Children.Add(GetItemButton());
 
         Button[] doubledButtons =
         [
@@ -97,5 +98,36 @@ internal sealed class ConfigurationView : IView
     public void AddTo(Controls root)
     {
         root.Add(_root);
+    }
+
+    private Button GetItemButton()
+    {
+        var btn = new Button
+        {
+            Content = "TH",
+            Height = 126,
+            Width = 68,
+        };
+
+        btn.Click += (src, args) =>
+        {
+            var cursorPosition = _automationService.RecordMousePosition();
+            cursorPosition.Match(
+                point =>
+                {
+                    Console.WriteLine($"Recorded mouse cursor position with (x, y): ({point.X}, {point.Y}).");
+                    _stateManager.Update(cfg => cfg with
+                    {
+                        CoordinatesConfig = cfg.CoordinatesConfig with
+                        {
+                            Item = point,
+                        }
+                    });
+                },
+                () => Console.WriteLine("The mouse cursor position wasn't recorded.")
+            );
+        };
+
+        return btn;
     }
 }

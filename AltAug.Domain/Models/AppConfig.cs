@@ -17,7 +17,7 @@ public readonly record struct AppConfig(
             Chaos: new(0, 0)
         ),
         new(
-            AutoGuiPause: 0.05m,
+            AutoGuiPause: 0.05,
             EnablePerfLogging: false
         ),
         new()
