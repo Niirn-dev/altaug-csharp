@@ -2,12 +2,14 @@
 using AltAug.Domain.Models.Enums;
 using AltAug.Domain.Models.Filters;
 using LanguageExt;
+using Microsoft.Extensions.Logging;
 
 namespace AltAug.Domain.Models.CraftingStrategies;
 
-internal sealed class AlterationStrategy(IAutomationService automationService) : ICraftingStrategy
+internal sealed partial class AlterationStrategy(IAutomationService automationService, ILogger<AlterationStrategy> logger) : ICraftingStrategy
 {
     private readonly IAutomationService _automationService = automationService;
+    private readonly ILogger<AlterationStrategy> _logger = logger;
 
     public bool ExecuteOperation(IReadOnlyCollection<IFilter> conditions, ItemLocationParams locationParams, int maxAttempts)
     {
@@ -17,7 +19,7 @@ internal sealed class AlterationStrategy(IAutomationService automationService) :
 
         if (conditions.All(c => c.IsMatch(item)))
         {
-            Console.WriteLine($"{nameof(AlterationStrategy)} finished crafting the item before even starting.");
+            LogInfoAlreadyCrafted();
             return true;
         }
 
@@ -36,12 +38,21 @@ internal sealed class AlterationStrategy(IAutomationService automationService) :
             item = new ItemInfo(_automationService.GetItemDescription(locationParams));
             if (conditions.All(c => c.IsMatch(item)))
             {
-                Console.WriteLine($"{nameof(AlterationStrategy)} finished crafting the item in {attempt + 1} attempts.");
+                LogInfoCraftingDone(attempt + 1);
                 return true;
             }
         }
 
-        Console.WriteLine($"{nameof(AlterationStrategy)} has reach max attempts before getting a successful craft.");
+        LogInfoCraftingFailed(maxAttempts);
         return false;
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "The item already fulfills the crafting requirements.")]
+    private partial void LogInfoAlreadyCrafted();
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Finished crafting the item. Currency used: {CurrencyUsed}")]
+    private partial void LogInfoCraftingDone(int currencyUsed);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Wasn't able to finish crafting the item. Currency used: {CurrencyUsed}")]
+    private partial void LogInfoCraftingFailed(int currencyUsed);
 }

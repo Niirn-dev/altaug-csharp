@@ -18,18 +18,25 @@ internal sealed class AutomationService(IStateManager stateManager) : IAutomatio
     {
         InputSimulator inputSimulator = new();
 
+        var point = Option<Vec2>.None;
         foreach (var _ in Enumerable.Range(0, pollRate * failsafeTimeoutSeconds))
         {
             if (inputSimulator.InputDeviceState.IsHardwareKeyDown(VirtualKeyCode.VK_E))
-                return WindowsNativeHelper.GetCursorPosition();
+            {
+                point = WindowsNativeHelper.GetCursorPosition();
+                break;
+            }
 
             if (inputSimulator.InputDeviceState.IsAnyHardwareKeyDown([VirtualKeyCode.VK_Q, VirtualKeyCode.ESCAPE]))
-                return Option<Vec2>.None;
+                break;
 
             Thread.Sleep(TimeSpan.FromSeconds(1.0 / pollRate));
         }
 
-        return Option<Vec2>.None;
+        while (inputSimulator.InputDeviceState.IsAnyHardwareKeyDown([VirtualKeyCode.VK_E, VirtualKeyCode.VK_Q, VirtualKeyCode.ESCAPE]))
+            Thread.Sleep(TimeSpan.FromSeconds(1.0 / pollRate));
+
+        return point;
     }
 
     public string GetItemDescription(ItemLocationParams locationParams)

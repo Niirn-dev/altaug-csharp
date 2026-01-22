@@ -1,39 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AltAug.UI.Interfaces;
+﻿using AltAug.UI.Interfaces;
+using AltAug.UI.Logging;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Microsoft.Extensions.Logging;
 
 namespace AltAug.UI.Views;
 
-internal sealed class LoggingView : IView
+public sealed class LoggingView(ILoggerFactory loggerFactory) : IView
 {
-    private readonly TextBox _logTextBox;
+    private readonly ILoggerFactory _loggerFactory = loggerFactory;
 
-    public LoggingView()
+    public void AddTo(Controls root)
     {
-        _logTextBox = new TextBox
+        var logTextBox = new TextBox()
         {
             IsReadOnly = true,
             AcceptsReturn = true,
             TextWrapping = TextWrapping.Wrap,
             Height = 150,
-            Text = "Initial log entry..."
+            Text = string.Empty,
         };
-    }
 
-    public void AddTo(Controls root)
-    {
         var clearButton = new Button
         {
             Content = "Clear Log",
             HorizontalAlignment = HorizontalAlignment.Left,
             Margin = new Thickness(0, 5, 0, 0)
         };
-        clearButton.Click += (s, e) => _logTextBox.Text = string.Empty;
+        clearButton.Click += (s, e) => logTextBox.Text = string.Empty;
 
         root.Add(new TextBlock
         {
@@ -41,7 +37,9 @@ internal sealed class LoggingView : IView
             FontWeight = FontWeight.Bold,
             Margin = new Thickness(0, 0, 0, 5)
         });
-        root.Add(_logTextBox);
+        root.Add(logTextBox);
         root.Add(clearButton);
+
+        _loggerFactory.AddProvider(new TextBoxLoggerProvider(logTextBox));
     }
 }

@@ -17,7 +17,7 @@ public readonly record struct AppConfig(
             Chaos: new(0, 0)
         ),
         new(
-            AutoGuiPause: 0.05,
+            AutoGuiPause: AutomationConfig.DefaultAutoGuiPause,
             EnablePerfLogging: false
         ),
         new()
@@ -49,6 +49,9 @@ public readonly record struct Vec2(double X, double Y)
         Y: left.Y / right);
 }
 
-public readonly record struct AutomationConfig(double AutoGuiPause, bool EnablePerfLogging);
+public readonly record struct AutomationConfig(double AutoGuiPause, bool EnablePerfLogging)
+{
+    public const double DefaultAutoGuiPause = 0.05;
+}
 
 public readonly record struct CraftingConfig();

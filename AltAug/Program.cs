@@ -6,8 +6,14 @@ using AltAug.UI;
 using AltAug.UI.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 using var host = Host.CreateDefaultBuilder(args)
+    .ConfigureLogging((ctx, builder) =>
+    {
+        builder.ClearProviders()
+            .AddConsole();
+    })
     .ConfigureServices((ctx, services) =>
     {
         services.RegisterDomainServices()

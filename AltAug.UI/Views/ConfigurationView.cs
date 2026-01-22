@@ -6,13 +6,13 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Avalonia.Platform;
 using LanguageExt;
+using Microsoft.Extensions.Logging;
 using MoreLinq;
 
 namespace AltAug.UI.Views;
 
-internal sealed class ConfigurationView : IView
+internal sealed partial class ConfigurationView : IView
 {
     private const int ConfigurationButtonSingleRowHeight = 61;
     private const int ConfigurationButtonDoubleRowHeight = 126;
@@ -21,11 +21,13 @@ internal sealed class ConfigurationView : IView
     private readonly StackPanel _root;
     private readonly IStateManager _stateManager;
     private readonly IAutomationService _automationService;
+    private readonly ILogger<ConfigurationView> _logger;
 
-    public ConfigurationView(IStateManager stateManager, IAutomationService automationService)
+    public ConfigurationView(IStateManager stateManager, IAutomationService automationService, ILogger<ConfigurationView> logger)
     {
         _stateManager = stateManager;
         _automationService = automationService;
+        _logger = logger;
 
         _root = new StackPanel
         {
@@ -53,7 +55,7 @@ internal sealed class ConfigurationView : IView
         };
         configButtonsStack.Children.Add(
             MakeDoubleRowConfigBtn(
-                "avares://AltAug.UI/Assets/bow_item.png",
+                AssetLibrary.GetBowItemBitmap(),
                 (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Item = point } }
             )
         );
@@ -61,23 +63,23 @@ internal sealed class ConfigurationView : IView
         Button[] doubledButtons =
         [
             MakeSingleRowConfigBtn(
-                "avares://AltAug.UI/Assets/alt_orb.png",
+                AssetLibrary.GetAlterationOrbBitmap(),
                 (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Alteration = point } }
             ),
             MakeSingleRowConfigBtn(
-                "avares://AltAug.UI/Assets/alch_orb.png",
+                AssetLibrary.GetAlchemyOrbBitmap(),
                 (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Alchemy = point } }
             ),
             MakeSingleRowConfigBtn(
-                "avares://AltAug.UI/Assets/aug_orb.png",
+                AssetLibrary.GetAugmentationOrbBitmap(),
                 (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Augmentation = point } }
             ),
             MakeSingleRowConfigBtn(
-                "avares://AltAug.UI/Assets/scour_orb.png",
+                AssetLibrary.GetScouringOrbBitmap(),
                 (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Scour = point } }
             ),
             MakeSingleRowConfigBtn(
-                "avares://AltAug.UI/Assets/chaos_orb.png",
+                AssetLibrary.GetChaosOrbBitmap(),
                 (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Chaos = point } }
             ),
             MakeMapConfigurationBtn(),
@@ -100,15 +102,26 @@ internal sealed class ConfigurationView : IView
         {
             Orientation = Orientation.Horizontal,
         };
-        delayStack.Children.Add(new NumericUpDown
+
+        var autoGuiDelayUpDown = new NumericUpDown
         {
             Increment = 0.005m,
-            Value = 0.050m,
+            Value = (decimal)_stateManager.AppConfig.AutomationConfig.AutoGuiPause,
             Minimum = 0.025m,
             Maximum = 1.0m,
             Width = 120,
             Margin = new Thickness(10, 5),
-        });
+        };
+        autoGuiDelayUpDown.ValueChanged += (src, args) => _stateManager.Update(
+            cfg => cfg with 
+            {
+                AutomationConfig = cfg.AutomationConfig with
+                {
+                    AutoGuiPause = (double?)args.NewValue ?? AutomationConfig.DefaultAutoGuiPause,
+                }
+            });
+
+        delayStack.Children.Add(autoGuiDelayUpDown);
         delayStack.Children.Add(new TextBlock
         {
             Text = "Set pause after each action (recommended higher than in-game ping)",
@@ -130,14 +143,11 @@ internal sealed class ConfigurationView : IView
 
     private Button MakeMapConfigurationBtn()
     {
-        var uri = new Uri("avares://AltAug.UI/Assets/map.png");
-        var bitmap = new Bitmap(AssetLoader.Open(uri));
-
         var btn = new Button
         {
             Content = new Image
             {
-                Source = bitmap,
+                Source = AssetLibrary.GetMapItemBitmap(),
                 Stretch = Stretch.Uniform,
             },
             Height = ConfigurationButtonSingleRowHeight,
@@ -151,47 +161,44 @@ internal sealed class ConfigurationView : IView
             _automationService.RecordMousePosition().Match(
                 point =>
                 {
-                    Console.WriteLine($"Recorded mouse cursor position with (x, y): ({point.X}, {point.Y}).");
+                    LogInfoCursorPosition(point.X, point.Y);
                     _stateManager.Update(cfg => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { MapTopLeft = point } });
                 },
-                () => Console.WriteLine("The mouse cursor position wasn't recorded.")
+                () => LogInfoCursorPositionNotRecorded()
             );
 
             _automationService.RecordMousePosition().Match(
                 point =>
                 {
-                    Console.WriteLine($"Recorded mouse cursor position with (x, y): ({point.X}, {point.Y}).");
+                    LogInfoCursorPosition(point.X, point.Y);
                     _stateManager.Update(cfg => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { MapBottomRight = point } });
                 },
-                () => Console.WriteLine("The mouse cursor position wasn't recorded.")
+                () => LogInfoCursorPositionNotRecorded()
             );
         };
 
         return btn;
     }
 
-    private Button MakeDoubleRowConfigBtn(string content, Func<AppConfig, Vec2, AppConfig> configUpdater) => MakeConfigurationButton(
-        content,
+    private Button MakeDoubleRowConfigBtn(Bitmap imageSource, Func<AppConfig, Vec2, AppConfig> configUpdater) => MakeConfigurationButton(
+        imageSource,
         height: ConfigurationButtonDoubleRowHeight,
         width: ConfigurationButtonWidth,
         configUpdater);
 
-    private Button MakeSingleRowConfigBtn(string content, Func<AppConfig, Vec2, AppConfig> configUpdater) => MakeConfigurationButton(
-        content,
+    private Button MakeSingleRowConfigBtn(Bitmap imageSource, Func<AppConfig, Vec2, AppConfig> configUpdater) => MakeConfigurationButton(
+        imageSource,
         height: ConfigurationButtonSingleRowHeight,
         width: ConfigurationButtonWidth,
         configUpdater);
 
-    private Button MakeConfigurationButton(string content, int height, int width, Func<AppConfig, Vec2, AppConfig> configUpdater)
+    private Button MakeConfigurationButton(Bitmap imageSource, int height, int width, Func<AppConfig, Vec2, AppConfig> configUpdater)
     {
-        var uri = new Uri(content);
-        var bitmap = new Bitmap(AssetLoader.Open(uri));
-
         var btn = new Button
         {
             Content = new Image
             {
-                Source = bitmap,
+                Source = imageSource,
                 Stretch = Stretch.Uniform,
             },
             Height = height,
@@ -206,13 +213,19 @@ internal sealed class ConfigurationView : IView
             cursorPosition.Match(
                 point =>
                 {
-                    Console.WriteLine($"Recorded mouse cursor position with (x, y): ({point.X}, {point.Y}).");
+                    LogInfoCursorPosition(point.X, point.Y);
                     _stateManager.Update(cfg => configUpdater(cfg, point));
                 },
-                () => Console.WriteLine("The mouse cursor position wasn't recorded.")
+                () => LogInfoCursorPositionNotRecorded()
             );
         };
 
         return btn;
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Recorded mouse cursor position with ({X}, {Y}).")]
+    private partial void LogInfoCursorPosition(double x, double y);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "The mouse cursor position wasn't recorded.")]
+    private partial void LogInfoCursorPositionNotRecorded();
 }
