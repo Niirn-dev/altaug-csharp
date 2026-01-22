@@ -32,22 +32,22 @@ internal sealed class AutomationService(IStateManager stateManager) : IAutomatio
         return Option<Vec2>.None;
     }
 
-    public string GetItemDescription(ItemLocation location, Option<int> inventoryPosition)
+    public string GetItemDescription(ItemLocationParams locationParams)
     {
         GetDelayedInputSimulator()
             .Mouse
-            .HoverItem(_stateManager.AppConfig, location, inventoryPosition)
+            .HoverItem(_stateManager.AppConfig, locationParams)
             .Keyboard
             .ModifiedKeyStroke([VirtualKeyCode.CONTROL, VirtualKeyCode.LMENU], VirtualKeyCode.VK_C);
 
         return ClipboardService.GetText() ?? string.Empty;
     }
 
-    public void UseCurrency(CurrencyOrb orb, ItemLocation location, Option<int> inventoryPosition) => GetDelayedInputSimulator()
+    public void UseCurrency(CurrencyOrb orb, ItemLocationParams locationParams) => GetDelayedInputSimulator()
         .Mouse
         .HoverCurrency(_stateManager.AppConfig, orb)
         .RightButtonClick()
-        .HoverItem(_stateManager.AppConfig, location, inventoryPosition)
+        .HoverItem(_stateManager.AppConfig, locationParams)
         .LeftButtonClick();
 
     private DelayedInputSimulator GetDelayedInputSimulator() => new(TimeSpan.FromSeconds(_stateManager.AppConfig.AutomationConfig.AutoGuiPause));

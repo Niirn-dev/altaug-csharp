@@ -7,6 +7,6 @@ namespace AltAug.Domain.Interfaces;
 public interface IAutomationService
 {
     Option<Vec2> RecordMousePosition(int pollRate = 20, int failsafeTimeoutSeconds = 10);
-    string GetItemDescription(ItemLocation location, Option<int> inventoryPosition);
-    void UseCurrency(CurrencyOrb orb, ItemLocation location, Option<int> inventoryPosition);
+    string GetItemDescription(ItemLocationParams locationParams);
+    void UseCurrency(CurrencyOrb orb, ItemLocationParams locationParams);
 }

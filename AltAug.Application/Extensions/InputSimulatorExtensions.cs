@@ -11,16 +11,15 @@ internal static class InputSimulatorExtensions
 
     public static IMouseSimulator HoverItem(this IMouseSimulator that,
         AppConfig appConfig,
-        ItemLocation location,
-        Option<int> inventoryPosition) => location switch
+        ItemLocationParams locationParams) => locationParams.Location switch
         {
             ItemLocation.CurrencyTab => that.HoverCurrencyTabItem(appConfig),
-            ItemLocation.Inventory => inventoryPosition
+            ItemLocation.Inventory => locationParams.InventoryPosition
                 .Match(
-                    s => that.HoverInventoryItem(appConfig, s),
-                    () => throw new ArgumentException($"Expected {nameof(inventoryPosition)} to be some when {nameof(location)} is {ItemLocation.Inventory}.")
+                    position => that.HoverInventoryItem(appConfig, locationParams.ItemDimensions, position),
+                    () => throw new ArgumentException($"Expected {nameof(locationParams.InventoryPosition)} to be some when {nameof(locationParams.Location)} is {ItemLocation.Inventory}.")
                 ),
-            _ => throw new ArgumentException($"Unsupported {nameof(location)} enum value."),
+            _ => throw new ArgumentException($"Unsupported {nameof(locationParams.Location)} enum value."),
         };
 
     public static IMouseSimulator HoverCurrency(this IMouseSimulator that, AppConfig appConfig, CurrencyOrb orb)
@@ -41,7 +40,7 @@ internal static class InputSimulatorExtensions
     public static IMouseSimulator HoverCurrencyTabItem(this IMouseSimulator that, AppConfig appConfig) => that
         .MoveMouseTo(appConfig.CoordinatesConfig.Item);
 
-    public static IMouseSimulator HoverInventoryItem(this IMouseSimulator that, AppConfig appConfig, int inventoryPosition)
+    public static IMouseSimulator HoverInventoryItem(this IMouseSimulator that, AppConfig appConfig, Vec2 itemDimensions, int inventoryPosition)
     {
         static Vec2 CalculateInventoryPosition(AppConfig appConfig, int inventoryPosition)
         {
