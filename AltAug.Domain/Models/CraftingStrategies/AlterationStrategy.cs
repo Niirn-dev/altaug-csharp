@@ -6,21 +6,21 @@ using Microsoft.Extensions.Logging;
 
 namespace AltAug.Domain.Models.CraftingStrategies;
 
-internal sealed partial class AlterationStrategy(IAutomationService automationService, ILogger<AlterationStrategy> logger) : ICraftingStrategy
+public sealed partial class AlterationStrategy(IAutomationService automationService, ILogger<AlterationStrategy> logger) : ICraftingStrategy
 {
     private readonly IAutomationService _automationService = automationService;
     private readonly ILogger<AlterationStrategy> _logger = logger;
 
-    public bool ExecuteOperation(IReadOnlyCollection<IFilter> conditions, ItemLocationParams locationParams, int maxAttempts)
+    public int ExecuteOperation(IReadOnlyCollection<IFilter> conditions, ItemLocationParams locationParams, int maxAttempts)
     {
         var item = new ItemInfo(_automationService.GetItemDescription(locationParams));
-        if (item.Rarity is not ItemRarity.Magic)
-            return false;
+        if (item is not { Rarity: ItemRarity.Magic, IsCorrupted: false })
+            return 0;
 
         if (conditions.All(c => c.IsMatch(item)))
         {
             LogInfoAlreadyCrafted();
-            return true;
+            return 0;
         }
 
         for (var attempt = 0; attempt < maxAttempts; attempt++)
@@ -38,13 +38,14 @@ internal sealed partial class AlterationStrategy(IAutomationService automationSe
             item = new ItemInfo(_automationService.GetItemDescription(locationParams));
             if (conditions.All(c => c.IsMatch(item)))
             {
-                LogInfoCraftingDone(attempt + 1);
-                return true;
+                var currencyUsed = attempt + 1;
+                LogInfoCraftingDone(currencyUsed);
+                return currencyUsed;
             }
         }
 
         LogInfoCraftingFailed(maxAttempts);
-        return false;
+        return maxAttempts;
     }
 
     [LoggerMessage(Level = LogLevel.Information, Message = "The item already fulfills the crafting requirements.")]

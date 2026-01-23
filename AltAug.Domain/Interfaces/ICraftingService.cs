@@ -1,9 +1,13 @@
-﻿using AltAug.Domain.Models.Enums;
-using LanguageExt;
+﻿using AltAug.Domain.Models;
 
 namespace AltAug.Domain.Interfaces;
 
-internal interface ICraftingService
+public interface ICraftingService
 {
-    bool Craft(ICraftingStrategy strategy, IReadOnlyCollection<IFilter> conditions, ItemLocation location, Option<int> inventoryPosition, int maxAttempts);
+    void CraftItems(
+        ICraftingStrategy strategy,
+        IReadOnlyCollection<IFilter> conditions,
+        ItemLocationParams locationParams,
+        int itemsCount,
+        int maxAttempts);
 }

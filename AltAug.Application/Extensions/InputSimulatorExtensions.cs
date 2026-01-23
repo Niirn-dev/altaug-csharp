@@ -40,7 +40,7 @@ internal static class InputSimulatorExtensions
     public static IMouseSimulator HoverCurrencyTabItem(this IMouseSimulator that, AppConfig appConfig) => that
         .MoveMouseTo(appConfig.CoordinatesConfig.Item);
 
-    public static IMouseSimulator HoverInventoryItem(this IMouseSimulator that, AppConfig appConfig, Vec2 itemDimensions, int inventoryPosition)
+    public static IMouseSimulator HoverInventoryItem(this IMouseSimulator that, AppConfig appConfig, Option<Vec2> itemDimensions, int inventoryPosition)
     {
         static Vec2 CalculateInventoryPosition(AppConfig appConfig, int inventoryPosition)
         {

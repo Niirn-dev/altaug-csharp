@@ -129,6 +129,7 @@ internal sealed partial class ConfigurationView : IView
         });
         _root.Children.Add(delayStack);
 
+        // TODO: link to app state
         _root.Children.Add(new CheckBox
         {
             Content = "Enable performance logging",
@@ -136,10 +137,7 @@ internal sealed partial class ConfigurationView : IView
         });
     }
 
-    public void AddTo(Controls root)
-    {
-        root.Add(_root);
-    }
+    public void AddTo(Controls root) => root.Add(_root);
 
     private Button MakeMapConfigurationBtn()
     {

@@ -7,5 +7,6 @@ namespace AltAug.Application.Extensions;
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection RegisterApplicationServices(this IServiceCollection that) => that
-        .AddTransient<IAutomationService, AutomationService>();
+        .AddTransient<IAutomationService, AutomationService>()
+        .AddTransient<ICraftingService, CraftingService>();
 }

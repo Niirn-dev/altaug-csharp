@@ -53,7 +53,7 @@ internal sealed class MainWindow : AppWindow
         };
 
         views.Cast<object>()
-            .Interleave(Enumerable.Range(0, views.Count() - 1).Select(_ => new Separator { Margin = new Thickness(0, 10, 0, 10) }))
+            .Interleave(Enumerable.Range(0, views.Count() - 1).Select(_ => new Separator { Margin = new Thickness(0, vertical: 10) }))
             .ForEach(item =>
             {
                 if (item is IView view)

@@ -82,5 +82,5 @@ public enum ItemRarity
 public enum ItemType
 {
     Gear = 1,
-    Map = 2,
+    Maps = 2,
 }

@@ -6,4 +6,4 @@ namespace AltAug.Domain.Models;
 public sealed record ItemLocationParams(
     ItemLocation Location,
     Option<int> InventoryPosition,
-    Vec2 ItemDimensions);
+    Option<Vec2> ItemDimensions);
