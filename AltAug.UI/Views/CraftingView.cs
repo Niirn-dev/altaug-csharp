@@ -2,7 +2,6 @@
 using AltAug.Domain.Interfaces;
 using AltAug.Domain.Models;
 using AltAug.Domain.Models.Enums;
-using AltAug.Domain.Models.Filters;
 using AltAug.UI.Elements;
 using AltAug.UI.Extensions;
 using AltAug.UI.Interfaces;
@@ -146,16 +145,12 @@ internal sealed class CraftingView : IView
         };
         _addFilterButton.Click += (_, _) =>
         {
-            var filterControl = _filterTypes[_filterComboBox.SelectedIndex] switch
-            {
-                Type t when t == typeof(OpenPrefixFilter) => throw new NotImplementedException(),
-                Type t when t == typeof(OpenSuffixFilter) => throw new NotImplementedException(),
-                Type t when t == typeof(RegexFilter) => new RegexFilterControl(),
-                _ => throw new NotImplementedException(),
-            };
+            var filterControl = ControlsLibrary.FilterControlFactory.MakeFilterControl(_filterTypes[_filterComboBox.SelectedIndex]);
 
-            filterControl.AddToContainer(_selectedFilterPanel);
+            filterControl.AddTo(_selectedFilterPanel.Children);
             _selectedFilterControls.Add(filterControl);
+
+            _selectedFilterControls.RemoveAll(f => f.IsRemoved);
         };
 
         _startCraftButton = new Button

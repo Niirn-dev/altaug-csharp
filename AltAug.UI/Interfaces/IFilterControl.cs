@@ -6,6 +6,6 @@ namespace AltAug.UI.Interfaces;
 internal interface IFilterControl
 {
     bool IsRemoved { get; }
-    void AddToContainer(StackPanel container);
+    void AddTo(Controls controls);
     IFilter MakeFilter();
 }
