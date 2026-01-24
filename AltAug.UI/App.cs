@@ -9,6 +9,7 @@ using Avalonia.Styling;
 using FluentAvalonia.Styling;
 using FluentAvalonia.UI.Windowing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MoreLinq;
 
 namespace AltAug.UI;
@@ -16,6 +17,7 @@ namespace AltAug.UI;
 internal sealed class App(IServiceProvider serviceProvider) : Application
 {
     private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly ILogger<App> _logger = serviceProvider.GetRequiredService<ILogger<App>>();
 
     public override void Initialize()
     {
@@ -30,6 +32,11 @@ internal sealed class App(IServiceProvider serviceProvider) : Application
         {
            desktop.MainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         }
+
+        Avalonia.Threading.Dispatcher.UIThread.UnhandledException += (sender, e) =>
+        {
+            _logger.LogError(e.Exception, "Unhandled UI exception.");
+        };
 
         base.OnFrameworkInitializationCompleted();
     }

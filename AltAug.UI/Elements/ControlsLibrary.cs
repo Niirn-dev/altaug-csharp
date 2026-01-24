@@ -14,5 +14,5 @@ internal static class ControlsLibrary
             Type t when t == typeof(RegexFilter) => new RegexFilterControl(),
             _ => throw new NotImplementedException(),
         };
-}
+    }
 }
