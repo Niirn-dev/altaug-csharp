@@ -10,9 +10,9 @@ using WindowsInput;
 
 namespace AltAug.Application.Services;
 
-internal sealed class AutomationService(IStateManager stateManager) : IAutomationService
+internal sealed class AutomationService(IStateManager<AppConfig> stateManager) : IAutomationService
 {
-    private readonly IStateManager _stateManager = stateManager;
+    private readonly IStateManager<AppConfig> _stateManager = stateManager;
 
     public Option<Vec2> RecordMousePosition(int pollRate = 20, int failsafeTimeoutSeconds = 10)
     {
@@ -43,7 +43,7 @@ internal sealed class AutomationService(IStateManager stateManager) : IAutomatio
     {
         GetDelayedInputSimulator()
             .Mouse
-            .HoverItem(_stateManager.AppConfig, locationParams)
+            .HoverItem(_stateManager.State, locationParams)
             .Keyboard
             .ModifiedKeyStroke([VirtualKeyCode.CONTROL, VirtualKeyCode.LMENU], VirtualKeyCode.VK_C);
 
@@ -52,10 +52,10 @@ internal sealed class AutomationService(IStateManager stateManager) : IAutomatio
 
     public void UseCurrency(CurrencyOrb orb, ItemLocationParams locationParams) => GetDelayedInputSimulator()
         .Mouse
-        .HoverCurrency(_stateManager.AppConfig, orb)
+        .HoverCurrency(_stateManager.State, orb)
         .RightButtonClick()
-        .HoverItem(_stateManager.AppConfig, locationParams)
+        .HoverItem(_stateManager.State, locationParams)
         .LeftButtonClick();
 
-    private DelayedInputSimulator GetDelayedInputSimulator() => new(TimeSpan.FromSeconds(_stateManager.AppConfig.AutomationConfig.AutoGuiPause));
+    private DelayedInputSimulator GetDelayedInputSimulator() => new(TimeSpan.FromSeconds(_stateManager.State.AutomationConfig.AutoGuiPause));
 }

@@ -2,6 +2,7 @@
 using AltAug.Application.Extensions;
 using AltAug.Domain.Extensions;
 using AltAug.Domain.Interfaces;
+using AltAug.Domain.Models;
 using AltAug.UI;
 using AltAug.UI.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +23,7 @@ using var host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 
-var stateManager = host.Services.GetRequiredService<IStateManager>();
+var stateManager = host.Services.GetRequiredService<IStateManager<AppConfig>>();
 
 Console.WriteLine("Starting GUI...");
 

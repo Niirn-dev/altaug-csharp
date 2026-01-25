@@ -1,5 +1,7 @@
 ﻿using AltAug.Domain.Interfaces;
+using AltAug.Domain.Models;
 using AltAug.Domain.Models.Filters;
+using AltAug.UI.Elements.Dialogs;
 using AltAug.UI.Extensions;
 using AltAug.UI.Interfaces;
 using Avalonia;
@@ -13,6 +15,8 @@ internal sealed class RegexFilterControl : IFilterControl
 {
     private const string ControlTitle = "Regex Filter";
 
+    private readonly RegexLibraryDialog _regexLibrary;
+
     private readonly Border _root;
     private readonly StackPanel _filterPanel;
     private readonly Panel _headerPanel;
@@ -24,9 +28,11 @@ internal sealed class RegexFilterControl : IFilterControl
 
     public bool IsRemoved { get; private set; } = false;
 
-    public RegexFilterControl()
+    public RegexFilterControl(IStateManager<RegexLibraryStore> regexLibraryManager)
     {
         // Initialize controls
+        _regexLibrary = new(regexLibraryManager);
+
         _root = new()
         {
             BorderBrush = Brushes.DimGray,
@@ -78,6 +84,7 @@ internal sealed class RegexFilterControl : IFilterControl
             Margin = new Thickness(4),
             HorizontalAlignment = HorizontalAlignment.Right,
         };
+        _openLibraryButton.Click += async (_, _) => await _regexLibrary.OpenDialogAsync();
 
         _closeButton = new()
         {

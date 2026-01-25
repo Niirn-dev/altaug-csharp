@@ -19,11 +19,11 @@ internal sealed partial class ConfigurationView : IView
     private const int ConfigurationButtonWidth = 63;
 
     private readonly StackPanel _root;
-    private readonly IStateManager _stateManager;
+    private readonly IStateManager<AppConfig> _stateManager;
     private readonly IAutomationService _automationService;
     private readonly ILogger<ConfigurationView> _logger;
 
-    public ConfigurationView(IStateManager stateManager, IAutomationService automationService, ILogger<ConfigurationView> logger)
+    public ConfigurationView(IStateManager<AppConfig> stateManager, IAutomationService automationService, ILogger<ConfigurationView> logger)
     {
         _stateManager = stateManager;
         _automationService = automationService;
@@ -106,7 +106,7 @@ internal sealed partial class ConfigurationView : IView
         var autoGuiDelayUpDown = new NumericUpDown
         {
             Increment = 0.005m,
-            Value = (decimal)_stateManager.AppConfig.AutomationConfig.AutoGuiPause,
+            Value = (decimal)_stateManager.State.AutomationConfig.AutoGuiPause,
             Minimum = 0.025m,
             Maximum = 1.0m,
             Width = 120,

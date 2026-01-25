@@ -23,6 +23,7 @@ internal sealed class CraftingView : IView
 
     private readonly IServiceProvider _serviceProvider;
     private readonly ICraftingService _craftingService;
+    private readonly IFilterControlFactory _filterControlFactory;
 
     private readonly StackPanel _root;
     private readonly ComboBox _itemLocationComboBox;
@@ -42,10 +43,11 @@ internal sealed class CraftingView : IView
     private readonly Type[] _craftingStrategyTypes;
     private readonly Type[] _filterTypes;
 
-    public CraftingView(IServiceProvider serviceProvider, ICraftingService craftingService)
+    public CraftingView(IServiceProvider serviceProvider, ICraftingService craftingService, IFilterControlFactory filterControlFactory)
     {
         _serviceProvider = serviceProvider;
         _craftingService = craftingService;
+        _filterControlFactory = filterControlFactory;
 
         // Initialize controls
         _root = new StackPanel
@@ -145,7 +147,7 @@ internal sealed class CraftingView : IView
         };
         _addFilterButton.Click += (_, _) =>
         {
-            var filterControl = ControlsLibrary.FilterControlFactory.MakeFilterControl(_filterTypes[_filterComboBox.SelectedIndex]);
+            var filterControl = _filterControlFactory.Create(_filterTypes[_filterComboBox.SelectedIndex]);
 
             filterControl.AddTo(_selectedFilterPanel.Children);
             _selectedFilterControls.Add(filterControl);

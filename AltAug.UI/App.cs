@@ -1,4 +1,5 @@
 ﻿using AltAug.Domain.Interfaces;
+using AltAug.Domain.Models;
 using AltAug.UI.Extensions;
 using AltAug.UI.Interfaces;
 using Avalonia;
@@ -44,9 +45,9 @@ internal sealed class App(IServiceProvider serviceProvider) : Application
 
 internal sealed class MainWindow : AppWindow
 {
-    private readonly IStateManager _stateManager;
+    private readonly IStateManager<AppConfig> _stateManager;
 
-    public MainWindow(IEnumerable<IView> views, IStateManager stateManager)
+    public MainWindow(IEnumerable<IView> views, IStateManager<AppConfig> stateManager)
     {
         _stateManager = stateManager;
 

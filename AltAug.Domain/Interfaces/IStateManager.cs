@@ -2,10 +2,10 @@
 
 namespace AltAug.Domain.Interfaces;
 
-public interface IStateManager
+public interface IStateManager<TState>
 {
-    AppConfig AppConfig { get; }
+    TState State { get; }
 
     void Save();
-    void Update(Func<AppConfig, AppConfig> updater);
+    void Update(Func<TState, TState> updater);
 }
