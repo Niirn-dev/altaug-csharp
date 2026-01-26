@@ -8,6 +8,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
+using FluentAvalonia.UI.Controls;
 
 namespace AltAug.UI.Elements;
 
@@ -84,7 +85,13 @@ internal sealed class RegexFilterControl : IFilterControl
             Margin = new Thickness(4),
             HorizontalAlignment = HorizontalAlignment.Right,
         };
-        _openLibraryButton.Click += async (_, _) => await _regexLibrary.OpenDialogAsync();
+        _openLibraryButton.Click += async (_, _) =>
+        {
+            var result = await _regexLibrary.OpenDialogAsync();
+
+            if (result is ContentDialogResult.Primary)
+                _regexTextBox.Text = _regexLibrary.RegexString;
+        };
 
         _closeButton = new()
         {

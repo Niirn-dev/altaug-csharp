@@ -39,6 +39,13 @@ internal static class ControlsLibrary
         Margin = new Thickness(left: 0, top: 0, right: 0, bottom: 5),
     };
 
+    public static TextBox MakeTextBox(string text) => new()
+    {
+        Height = 30,
+        Text = text,
+        HorizontalAlignment = HorizontalAlignment.Stretch,
+    };
+
     public static ComboBox MakeComboBox() => new()
     {
         Height = 30,

@@ -19,11 +19,33 @@ public static class RegexLibraryHelpers
     public static IReadOnlyCollection<string> GetRegexTitles(
         this RegexLibraryStore that,
         string itemType,
-        string itemBase) => that.TypeToBaseToNameToValue[itemType][itemBase].Keys;
+        string itemBase)
+    {
+        if (!that.TypeToBaseToNameToValue.TryGetValue(itemType, out var basesDict))
+            return [];
+
+        if (!basesDict.TryGetValue(itemBase, out var regexTitlesDict))
+            return [];
+
+        return regexTitlesDict.Keys;
+    }
+
 
     public static string GetRegexString(
         this RegexLibraryStore that,
         string itemType,
         string itemBase,
-        string regexTitle) => that.TypeToBaseToNameToValue[itemType][itemBase][regexTitle];
+        string regexTitle)
+    {
+        if (!that.TypeToBaseToNameToValue.TryGetValue(itemType, out var basesDict))
+            return string.Empty;
+
+        if (!basesDict.TryGetValue(itemBase, out var regexTitlesDict))
+            return string.Empty;
+
+        if (!regexTitlesDict.TryGetValue(regexTitle, out var regexString))
+            return string.Empty;
+
+        return regexString;
+    }
 }
