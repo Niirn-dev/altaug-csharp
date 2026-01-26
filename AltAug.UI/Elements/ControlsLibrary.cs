@@ -31,12 +31,19 @@ internal static class ControlsLibrary
         VerticalContentAlignment = VerticalAlignment.Center,
     };
 
-    public static TextBlock MakeTitleTextBlock(string content) => new()
+    public static TextBlock MakeTitleTextBlock(string text) => new()
+    {
+        Height = 30,
+        Text = text,
+        FontWeight = FontWeight.Bold,
+        Margin = new Thickness(left: 0, top: 0, right: 0, bottom: 5),
+    };
+
+    public static TextBlock MakeTextBlock(string content) => new()
     {
         Height = 30,
         Text = content,
-        FontWeight = FontWeight.Bold,
-        Margin = new Thickness(left: 0, top: 0, right: 0, bottom: 5),
+        Margin = new Thickness(uniformLength: 4),
     };
 
     public static TextBox MakeTextBox(string text) => new()
@@ -51,5 +58,16 @@ internal static class ControlsLibrary
         Height = 30,
         HorizontalAlignment = HorizontalAlignment.Stretch,
         Margin = new Thickness(uniformLength: 4),
+    };
+
+    public static NumericUpDown MakeIntUpDown(int value) => new()
+    {
+        Value = value,
+        Height = 30,
+        Width = 125,
+        Margin = new Thickness(uniformLength: 4),
+        Increment = 1,
+        Minimum = 1,
+        FormatString = "0",
     };
 }

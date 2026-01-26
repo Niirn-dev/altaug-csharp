@@ -19,7 +19,7 @@ internal sealed class CraftingView : IView
 {
     private const string ViewTitle = "Crafting";
     private const int DefaultItemsToCraft = 1;
-    private const int DefaultCurrencyToUse = 20;
+    private const int DefaultCurrencyCountToUse = 20;
 
     private readonly IServiceProvider _serviceProvider;
     private readonly ICraftingService _craftingService;
@@ -56,22 +56,12 @@ internal sealed class CraftingView : IView
             Margin = new Thickness(0),
         };
 
-        _itemLocationComboBox = new ComboBox
-        {
-            Height = 30,
-            Width = 200,
-            Margin = new Thickness(4),
-        };
+        _itemLocationComboBox = ControlsLibrary.MakeComboBox();
         Enum.GetNames<ItemLocation>()
             .ForEach(l => _itemLocationComboBox.Items.Add(l));
         _itemLocationComboBox.SelectedIndex = 0;
 
-        _craftingStrategyComboBox = new ComboBox
-        {
-            Height = 30,
-            Width = 200,
-            Margin = new Thickness(4),
-        };
+        _craftingStrategyComboBox = ControlsLibrary.MakeComboBox();
         _craftingStrategyTypes = [.. AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(x => x.GetTypes())
             .Where(t => typeof(ICraftingStrategy).IsAssignableFrom(t)
@@ -91,44 +81,19 @@ internal sealed class CraftingView : IView
             FormatString = "0",
         };
 
-        _itemCountText = new TextBlock
-        {
-            Text = "Items to craft",
-            Height = 30,
-            Margin = new Thickness(4),
-        };
+        _itemCountText = ControlsLibrary.MakeTextBlock(content: "Items to craft");
 
-        _currencyUsedUpDown = new NumericUpDown
-        {
-            Value = DefaultCurrencyToUse,
-            Height = 30,
-            Width = 125,
-            Margin = new Thickness(4),
-            Increment = 1,
-            Minimum = 1,
-            FormatString = "0",
-        };
+        _currencyUsedUpDown = ControlsLibrary.MakeIntUpDown(value: DefaultCurrencyCountToUse);
 
-        _currencyUsedText = new TextBlock
-        {
-            Text = "Currency to use",
-            Height = 30,
-            Margin = new Thickness(4),
-        };
+        _currencyUsedText = ControlsLibrary.MakeTextBlock(content: "Currency to use");
 
         _selectedFilterPanel = new StackPanel
         {
             Orientation = Orientation.Vertical,
-            Margin = new Thickness(0),
+            Margin = new Thickness(uniformLength: 0),
         };
 
-        _filterComboBox = new ComboBox
-        {
-            Height = 30,
-            Width = 200,
-            Margin = new Thickness(4),
-            HorizontalAlignment = HorizontalAlignment.Left,
-        };
+        _filterComboBox = ControlsLibrary.MakeComboBox();
         _filterTypes = [.. AppDomain.CurrentDomain.GetAssemblies()
             .SelectMany(t => t.GetTypes())
             .Where(t => typeof(IFilter).IsAssignableFrom(t)
@@ -137,14 +102,8 @@ internal sealed class CraftingView : IView
         _filterTypes.ForEach(t => _filterComboBox.Items.Add(t.Name));
         _filterComboBox.SelectedIndex = 0;
 
-        _addFilterButton = new Button
-        {
-            Height = 30,
-            Width = 30,
-            Margin = new Thickness(4),
-            Content = "+",
-            HorizontalAlignment = HorizontalAlignment.Right,
-        };
+        _addFilterButton = ControlsLibrary.MakeSquareButton(content: "x");
+        _addFilterButton.HorizontalAlignment = HorizontalAlignment.Right;
         _addFilterButton.Click += (_, _) =>
         {
             var filterControl = _filterControlFactory.Create(_filterTypes[_filterComboBox.SelectedIndex]);
@@ -155,13 +114,9 @@ internal sealed class CraftingView : IView
             _selectedFilterControls.RemoveAll(f => f.IsRemoved);
         };
 
-        _startCraftButton = new Button
-        {
-            Height = 30,
-            Margin = new Thickness(uniformLength: 4),
-            Content = "Start crafting",
-            HorizontalAlignment = HorizontalAlignment.Right,
-        };
+        _startCraftButton = ControlsLibrary.MakeFixedHeightButton(content: "Start crafting");
+        _startCraftButton.HorizontalAlignment = HorizontalAlignment.Right;
+        _startCraftButton.Padding = new Thickness(horizontal: 4, vertical: 0);
         _startCraftButton.Click += (_, _) =>
         {
             var strategy = _serviceProvider.GetRequiredKeyedService<ICraftingStrategy>(_craftingStrategyTypes[_craftingStrategyComboBox.SelectedIndex]);
@@ -189,7 +144,7 @@ internal sealed class CraftingView : IView
 
             var maxAttempts = _currencyUsedUpDown.Value.HasValue
                 ? (int)_currencyUsedUpDown.Value.Value
-                : DefaultCurrencyToUse;
+                : DefaultCurrencyCountToUse;
 
             var locationParams = new ItemLocationParams(itemLocation, inventoryPosition, Option<Vec2>.None);
 
@@ -199,12 +154,7 @@ internal sealed class CraftingView : IView
         };
 
         // Define layout
-        _root.Children.Add(new TextBlock
-        {
-            Text = ViewTitle,
-            FontWeight = FontWeight.Bold,
-            Margin = new Thickness(0, 0, 0, bottom: 5),
-        });
+        _root.Children.Add(ControlsLibrary.MakeTitleTextBlock(text: ViewTitle));
 
         _root.Children.Add(new Border
         {
