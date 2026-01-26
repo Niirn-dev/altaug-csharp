@@ -8,7 +8,13 @@ public static class RegexLibraryHelpers
 
     public static IReadOnlyCollection<string> GetItemBases(
         this RegexLibraryStore that,
-        string itemType) => that.TypeToBaseToNameToValue[itemType].Keys;
+        string itemType)
+    {
+        if (!that.TypeToBaseToNameToValue.TryGetValue(itemType, out var basesDict))
+            return [];
+
+        return basesDict.Keys;
+    }
 
     public static IReadOnlyCollection<string> GetRegexTitles(
         this RegexLibraryStore that,

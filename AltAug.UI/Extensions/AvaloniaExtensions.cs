@@ -30,4 +30,6 @@ internal static class AvaloniaExtensions
 
         return that;
     }
+
+    public static TValue SelectedValueOrDefault<TValue>(this ComboBox that, TValue defaultValue) => (TValue?)that.SelectedValue ?? defaultValue;
 }

@@ -7,16 +7,5 @@ public readonly record struct RegexLibraryStore(
             string,
             Dictionary<string, string>>> TypeToBaseToNameToValue)
 {
-    public static RegexLibraryStore DefaultInstance { get; } = new(
-        new()
-        {
-            [string.Empty] = new()
-            {
-                [string.Empty] = new()
-                {
-                    [string.Empty] = string.Empty
-                },
-            },
-        }
-    );
+    public static RegexLibraryStore DefaultInstance { get; } = new([]);
 }
