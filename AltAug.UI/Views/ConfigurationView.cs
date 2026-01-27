@@ -1,5 +1,6 @@
 ﻿using AltAug.Domain.Interfaces;
 using AltAug.Domain.Models;
+using AltAug.UI.Elements;
 using AltAug.UI.Interfaces;
 using Avalonia;
 using Avalonia.Controls;
@@ -14,11 +15,13 @@ namespace AltAug.UI.Views;
 
 internal sealed partial class ConfigurationView : IView
 {
+    private const string ViewTitle = "Configuration";
     private const int ConfigurationButtonSingleRowHeight = 61;
     private const int ConfigurationButtonDoubleRowHeight = 126;
     private const int ConfigurationButtonWidth = 63;
 
-    private readonly StackPanel _root;
+    private readonly Expander _root;
+    private readonly StackPanel _mainPanel;
     private readonly IStateManager<AppConfig> _stateManager;
     private readonly IAutomationService _automationService;
     private readonly ILogger<ConfigurationView> _logger;
@@ -29,23 +32,13 @@ internal sealed partial class ConfigurationView : IView
         _automationService = automationService;
         _logger = logger;
 
-        _root = new StackPanel
+        _mainPanel = new StackPanel
         {
             Orientation = Orientation.Vertical,
             Margin = new Thickness(0),
         };
 
-        _root.Children.Add(new TextBlock
-        {
-            Text = "Configuration",
-            FontWeight = FontWeight.Bold,
-            Margin = new Thickness(0, 0, 0, 5),
-        });
-
-        _root.Children.Add(new TextBlock
-        {
-            Text = "Configure Coordinates:",
-        });
+        _mainPanel.Children.Add(ControlsLibrary.MakeTextBlock(text: "Configure Coordinates:"));
 
         var configButtonsStack = new StackPanel
         {
@@ -96,7 +89,7 @@ internal sealed partial class ConfigurationView : IView
                 return sp;
             })
             .ForEach(configButtonsStack.Children.Add);
-        _root.Children.Add(configButtonsStack);
+        _mainPanel.Children.Add(configButtonsStack);
 
         var delayStack = new StackPanel
         {
@@ -127,17 +120,28 @@ internal sealed partial class ConfigurationView : IView
             Text = "Set pause after each action (recommended higher than in-game ping)",
             VerticalAlignment = VerticalAlignment.Center,
         });
-        _root.Children.Add(delayStack);
+        _mainPanel.Children.Add(delayStack);
 
         // TODO: link to app state
-        _root.Children.Add(new CheckBox
+        _mainPanel.Children.Add(new CheckBox
         {
             Content = "Enable performance logging",
             Margin = new Thickness(10, 5),
         });
+
+        var header = ControlsLibrary.MakeTitleTextBlock(text: ViewTitle);
+        header.VerticalAlignment = VerticalAlignment.Center;
+        header.Margin = new Thickness(uniformLength: 0);
+        _root = new()
+        {
+            Header = header,
+            IsExpanded = false,
+            ExpandDirection = ExpandDirection.Down,
+            Content = _mainPanel,
+        };
     }
 
-    public void AddTo(Controls root) => root.Add(_root);
+    public Control GetControl() => _root;
 
     private Button MakeMapConfigurationBtn()
     {

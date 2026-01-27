@@ -25,7 +25,7 @@ internal static class ControlsLibrary
         Content = content,
         FontWeight = FontWeight.Bold,
         Margin = new Thickness(uniformLength: 4),
-        Padding = new Thickness(uniformLength: 0),
+        Padding = new Thickness(horizontal: 4, vertical: 0),
         HorizontalAlignment = HorizontalAlignment.Stretch,
         HorizontalContentAlignment = HorizontalAlignment.Center,
         VerticalContentAlignment = VerticalAlignment.Center,
@@ -39,10 +39,10 @@ internal static class ControlsLibrary
         Margin = new Thickness(left: 0, top: 0, right: 0, bottom: 5),
     };
 
-    public static TextBlock MakeTextBlock(string content) => new()
+    public static TextBlock MakeTextBlock(string text) => new()
     {
         Height = 30,
-        Text = content,
+        Text = text,
         Margin = new Thickness(uniformLength: 4),
     };
 

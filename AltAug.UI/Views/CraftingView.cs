@@ -81,11 +81,11 @@ internal sealed class CraftingView : IView
             FormatString = "0",
         };
 
-        _itemCountText = ControlsLibrary.MakeTextBlock(content: "Items to craft");
+        _itemCountText = ControlsLibrary.MakeTextBlock(text: "Items to craft");
 
         _currencyUsedUpDown = ControlsLibrary.MakeIntUpDown(value: DefaultCurrencyCountToUse);
 
-        _currencyUsedText = ControlsLibrary.MakeTextBlock(content: "Currency to use");
+        _currencyUsedText = ControlsLibrary.MakeTextBlock(text: "Currency to use");
 
         _selectedFilterPanel = new StackPanel
         {
@@ -116,7 +116,6 @@ internal sealed class CraftingView : IView
 
         _startCraftButton = ControlsLibrary.MakeFixedHeightButton(content: "Start crafting");
         _startCraftButton.HorizontalAlignment = HorizontalAlignment.Right;
-        _startCraftButton.Padding = new Thickness(horizontal: 4, vertical: 0);
         _startCraftButton.Click += (_, _) =>
         {
             var strategy = _serviceProvider.GetRequiredKeyedService<ICraftingStrategy>(_craftingStrategyTypes[_craftingStrategyComboBox.SelectedIndex]);
@@ -177,7 +176,7 @@ internal sealed class CraftingView : IView
         });
     }
 
-    public void AddTo(Controls root) => root.Add(_root);
+    public Control GetControl() => _root;
 
     private Grid MakeStrategySelectorGrid()
     {

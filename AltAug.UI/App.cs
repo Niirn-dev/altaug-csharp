@@ -5,7 +5,6 @@ using AltAug.UI.Interfaces;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Layout;
 using Avalonia.Styling;
 using FluentAvalonia.Styling;
 using FluentAvalonia.UI.Windowing;
@@ -54,29 +53,34 @@ internal sealed class MainWindow : AppWindow
         Title = "Alt-Aug C# Edition";
         Width = 800;
         Height = 600;
-        var rootPanel = new StackPanel
+        var root = new Grid
         {
-            Orientation = Orientation.Vertical,
+            RowDefinitions = RowDefinitions.Parse(
+                string.Join(
+                    ',',
+                    Enumerable.Range(0, (views.Count() - 1) * 2)
+                        .Select(_ => "Auto")
+                        .Append("*"))),
             Margin = new Thickness(10)
         };
 
         views.Cast<object>()
             .Interleave(Enumerable.Range(0, views.Count() - 1).Select(_ => new Separator { Margin = new Thickness(0, vertical: 10) }))
-            .ForEach(item =>
+            .ForEach((item, index) =>
             {
                 if (item is IView view)
                 {
-                    rootPanel.Children.AddView(view);
+                    root.AddControl(view.GetControl(), row: index, column: 0);
                 }
                 else if (item is Control control)
                 {
-                    rootPanel.Children.Add(control);
+                    root.AddControl(control, row: index, column: 0);
                 }
             });
 
         Content = new ScrollViewer
         {
-            Content = rootPanel
+            Content = root,
         };
 
     }

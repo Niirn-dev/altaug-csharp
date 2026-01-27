@@ -4,5 +4,5 @@ namespace AltAug.UI.Interfaces;
 
 internal interface IView
 {
-    public void AddTo(Controls root);
+    public Control GetControl();
 }
