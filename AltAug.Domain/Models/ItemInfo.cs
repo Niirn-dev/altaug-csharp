@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using AltAug.Domain.Helpers;
 using MoreLinq;
 
@@ -12,6 +13,8 @@ public sealed class ItemInfo
     public List<AffixInfo> Prefixes { get; init; } = [];
     public List<AffixInfo> Suffixes { get; init; } = [];
     public bool IsCorrupted { get; init; } = false;
+
+    public List<AffixInfo> Affixes { get => [ ..Prefixes, ..Suffixes]; }
 
     public ItemInfo(string advancedDescription)
     {
@@ -45,7 +48,8 @@ public sealed class ItemInfo
             AffixInfo info = new(
                 Type: m.Groups[RegexHelper.AffixRegexGroupAffixType].Value,
                 Name: m.Groups[RegexHelper.AffixRegexGroupAffixName].Value,
-                Tier: m.Groups[RegexHelper.AffixRegexGroupTier].Value,
+                TierTitle: m.Groups[RegexHelper.AffixRegexGroupTierTitle].Value,
+                TierValue: int.Parse(m.Groups[RegexHelper.AffixRegexGroupTierValue].Value),
                 Description: m.Groups[RegexHelper.AffixRegexGroupDescription].Value
             );
 
@@ -60,6 +64,16 @@ public sealed class ItemInfo
         });
     }
 
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+
+        sb.AppendLine("Item affixes:");
+        Affixes.ForEach(affix => sb.AppendLine($"- {affix}"));
+
+        return sb.ToString();
+    }
+
     public bool IsAffixesFull() => Rarity switch
     {
         ItemRarity.Magic => (Prefixes.Count + Suffixes.Count) >= 2,
@@ -68,7 +82,12 @@ public sealed class ItemInfo
     };
 }
 
-public sealed record AffixInfo(string Type, string Name, string Tier, string Description);
+public sealed record AffixInfo(string Type, string Name, string TierTitle, int TierValue, string Description)
+{
+    public string Tier { get => $"{TierTitle}: {TierValue}"; }
+
+    public override string ToString() => $"{Type} | {Name} | {Tier} | {Description}";
+}
 
 public enum ItemRarity
 {

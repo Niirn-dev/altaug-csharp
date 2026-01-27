@@ -15,11 +15,12 @@ public static partial class RegexHelper
 
     public const string AffixRegexGroupAffixType = "affix_type";
     public const string AffixRegexGroupAffixName = "affix_name";
-    public const string AffixRegexGroupTier = "tier";
+    public const string AffixRegexGroupTierTitle = "tier_title";
+    public const string AffixRegexGroupTierValue = "tier_value";
     public const string AffixRegexGroupDescription = "description";
 
     [GeneratedRegex(
-        @"^{ (?:Master Crafted )?(?<affix_type>Prefix|Suffix) Modifier \""(?<affix_name>[\w\s'-]*)\"" (?:\((?<tier>(?:Rank|Tier): \d*)\))?[^(?:\r\n|\n|\r)]*$(?:\r\n|\n|\r)(?<description>[^{]*?)(?=(?:\n\n))",
+        @"^{ (?:Master Crafted )?(?<affix_type>Prefix|Suffix) Modifier \""(?<affix_name>[\w\s'-]*)\"" (?:\((?<tier_title>Rank|Tier): (?<tier_value>\d*)\))?[^(?:\r\n|\n|\r)]*$(?:\r\n|\n|\r)(?<description>[^{]*?)(?=(?:\n\n))",
         RegexOptions.Multiline)]
     public static partial Regex AffixRegex { get; }
 }
