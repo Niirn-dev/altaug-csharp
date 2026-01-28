@@ -1,4 +1,5 @@
-﻿using AltAug.Application.Services;
+﻿using AltAug.Application.CraftingStrategies;
+using AltAug.Application.Services;
 using AltAug.Domain.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,5 +9,8 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection RegisterApplicationServices(this IServiceCollection that) => that
         .AddTransient<IAutomationService, AutomationService>()
-        .AddTransient<ICraftingService, CraftingService>();
+        .AddTransient<ICraftingService, CraftingService>()
+        .AddKeyedTransient<ICraftingStrategy, AlterationStrategy>(typeof(AlterationStrategy))
+        .AddKeyedTransient<ICraftingStrategy, AlchemyStrategy>(typeof(AlchemyStrategy))
+        .AddKeyedTransient<ICraftingStrategy, ChaosStrategy>(typeof(ChaosStrategy));
 }
