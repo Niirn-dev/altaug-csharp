@@ -1,4 +1,5 @@
 ﻿using AltAug.Domain.Interfaces;
+using AltAug.Domain.Models.Filters;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -6,7 +7,7 @@ namespace AltAug.Domain.Models.StateManagers;
 
 public abstract class StateManagerBase<TState> : IStateManager<TState>
 {
-    private readonly string _stateFilePath;
+    private readonly FileInfo _stateFile;
     private readonly ISerializer _serializer;
     private readonly IDeserializer _deserializer;
 
@@ -14,20 +15,34 @@ public abstract class StateManagerBase<TState> : IStateManager<TState>
 
     protected StateManagerBase(string stateFilePath, TState defaultState)
     {
-        _stateFilePath = stateFilePath;
+        _stateFile = new(stateFilePath);
 
         _serializer = new SerializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .WithTagMapping("!OpenPrefixFilterParameters", typeof(OpenPrefixFilterParameters))
+            .WithTagMapping("!OpenSuffixFilterParameters", typeof(OpenSuffixFilterParameters))
+            .WithTagMapping("!RegexFilterParameters", typeof(RegexFilterParameters))
             .Build();
 
         _deserializer = new DeserializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .WithTagMapping("!OpenPrefixFilterParameters", typeof(OpenPrefixFilterParameters))
+            .WithTagMapping("!OpenSuffixFilterParameters", typeof(OpenSuffixFilterParameters))
+            .WithTagMapping("!RegexFilterParameters", typeof(RegexFilterParameters))
             .Build();
 
-        if (File.Exists(_stateFilePath))
+        if (_stateFile.Exists)
         {
-            var yaml = File.ReadAllText(_stateFilePath);
-            State = _deserializer.Deserialize<TState>(yaml);
+            try
+            {
+                var yaml = File.ReadAllText(_stateFile.FullName);
+                State = _deserializer.Deserialize<TState>(yaml);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed while deserializing existing state file. Continuing using the default state. {0}", ex);
+                State = defaultState;
+            }
         }
         else
         {
@@ -37,8 +52,10 @@ public abstract class StateManagerBase<TState> : IStateManager<TState>
 
     public void Save()
     {
+        _stateFile.Directory?.Create();
+
         var yaml = _serializer.Serialize(State);
-        File.WriteAllText(_stateFilePath, yaml);
+        File.WriteAllText(_stateFile.FullName, yaml);
     }
 
     public void Update(Func<TState, TState> updater) => State = updater(State);

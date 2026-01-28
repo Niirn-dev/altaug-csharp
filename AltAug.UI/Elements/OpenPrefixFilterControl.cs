@@ -18,6 +18,8 @@ internal sealed class OpenPrefixFilterControl : IFilterControl
     private readonly Button _closeButton;
 
     public bool IsRemoved { get; private set; } = false;
+    public Type FilterType { get; } = typeof(OpenPrefixFilter);
+    public IFilterParams Parameters { get; } = new OpenPrefixFilterParameters();
 
     public OpenPrefixFilterControl()
     {
@@ -71,6 +73,16 @@ internal sealed class OpenPrefixFilterControl : IFilterControl
         };
 
         controls.Add(_root);
+    }
+
+    public void Accept(IFilterParams @params)
+    {
+        if (@params is not OpenPrefixFilterParameters)
+            // For potential logging
+            return;
+
+        // No parameters to apply for this control
+        return;
     }
 
     public IFilter MakeFilter() => new OpenPrefixFilter();

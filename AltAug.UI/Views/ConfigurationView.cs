@@ -20,15 +20,17 @@ internal sealed partial class ConfigurationView : IView
     private const int ConfigurationButtonDoubleRowHeight = 126;
     private const int ConfigurationButtonWidth = 63;
 
-    private readonly Expander _root;
-    private readonly StackPanel _mainPanel;
-    private readonly IStateManager<AppConfig> _stateManager;
+    private readonly IStateManager<AppConfig> _appManager;
     private readonly IAutomationService _automationService;
     private readonly ILogger<ConfigurationView> _logger;
 
+    private readonly Expander _root;
+    private readonly StackPanel _mainPanel;
+    private readonly CheckBox _extraLoggingCheckBox;
+
     public ConfigurationView(IStateManager<AppConfig> stateManager, IAutomationService automationService, ILogger<ConfigurationView> logger)
     {
-        _stateManager = stateManager;
+        _appManager = stateManager;
         _automationService = automationService;
         _logger = logger;
 
@@ -99,13 +101,13 @@ internal sealed partial class ConfigurationView : IView
         var autoGuiDelayUpDown = new NumericUpDown
         {
             Increment = 0.005m,
-            Value = (decimal)_stateManager.State.AutomationConfig.AutoGuiPause,
+            Value = (decimal)_appManager.State.AutomationConfig.AutoGuiPause,
             Minimum = 0.025m,
             Maximum = 1.0m,
             Width = 120,
             Margin = new Thickness(10, 5),
         };
-        autoGuiDelayUpDown.ValueChanged += (src, args) => _stateManager.Update(
+        autoGuiDelayUpDown.ValueChanged += (src, args) => _appManager.Update(
             cfg => cfg with 
             {
                 AutomationConfig = cfg.AutomationConfig with
@@ -122,12 +124,22 @@ internal sealed partial class ConfigurationView : IView
         });
         _mainPanel.Children.Add(delayStack);
 
-        // TODO: link to app state
-        _mainPanel.Children.Add(new CheckBox
+        _extraLoggingCheckBox = new()
         {
             Content = "Enable performance logging",
-            Margin = new Thickness(10, 5),
-        });
+            IsChecked = _appManager.State.AutomationConfig.EnablePerfLogging,
+            Margin = new Thickness(horizontal: 10, vertical: 5),
+        };
+        _extraLoggingCheckBox.IsCheckedChanged += (_, _) => _appManager.Update(
+            cfg => cfg with
+            {
+                AutomationConfig = cfg.AutomationConfig with
+                {
+                    EnablePerfLogging = _extraLoggingCheckBox.IsChecked ?? AutomationConfig.DefaultPerfLogging,
+                }
+            });
+
+        _mainPanel.Children.Add(_extraLoggingCheckBox);
 
         var header = ControlsLibrary.MakeTitleTextBlock(text: ViewTitle);
         header.VerticalAlignment = VerticalAlignment.Center;
@@ -164,7 +176,7 @@ internal sealed partial class ConfigurationView : IView
                 point =>
                 {
                     LogInfoCursorPosition(point.X, point.Y);
-                    _stateManager.Update(cfg => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { MapTopLeft = point } });
+                    _appManager.Update(cfg => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { MapTopLeft = point } });
                 },
                 () => LogInfoCursorPositionNotRecorded()
             );
@@ -173,7 +185,7 @@ internal sealed partial class ConfigurationView : IView
                 point =>
                 {
                     LogInfoCursorPosition(point.X, point.Y);
-                    _stateManager.Update(cfg => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { MapBottomRight = point } });
+                    _appManager.Update(cfg => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { MapBottomRight = point } });
                 },
                 () => LogInfoCursorPositionNotRecorded()
             );
@@ -216,7 +228,7 @@ internal sealed partial class ConfigurationView : IView
                 point =>
                 {
                     LogInfoCursorPosition(point.X, point.Y);
-                    _stateManager.Update(cfg => configUpdater(cfg, point));
+                    _appManager.Update(cfg => configUpdater(cfg, point));
                 },
                 () => LogInfoCursorPositionNotRecorded()
             );

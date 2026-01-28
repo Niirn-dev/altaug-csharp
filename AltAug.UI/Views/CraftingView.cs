@@ -1,4 +1,5 @@
 ﻿using AltAug.Domain.Extensions;
+using AltAug.Domain.Helpers;
 using AltAug.Domain.Interfaces;
 using AltAug.Domain.Models;
 using AltAug.Domain.Models.Enums;
@@ -18,12 +19,11 @@ namespace AltAug.UI.Views;
 internal sealed class CraftingView : IView
 {
     private const string ViewTitle = "Crafting";
-    private const int DefaultItemsToCraft = 1;
-    private const int DefaultCurrencyCountToUse = 20;
 
     private readonly IServiceProvider _serviceProvider;
     private readonly ICraftingService _craftingService;
     private readonly IFilterControlFactory _filterControlFactory;
+    private readonly IStateManager<AppConfig> _appManager;
 
     private readonly StackPanel _root;
     private readonly ComboBox _itemLocationComboBox;
@@ -43,11 +43,15 @@ internal sealed class CraftingView : IView
     private readonly Type[] _craftingStrategyTypes;
     private readonly Type[] _filterTypes;
 
-    public CraftingView(IServiceProvider serviceProvider, ICraftingService craftingService, IFilterControlFactory filterControlFactory)
+    private Type SelectedCraftingStrategyType { get => _craftingStrategyTypes[_craftingStrategyComboBox.SelectedIndex]; }
+    private Type SelectedFilterType { get => _filterTypes[_filterComboBox.SelectedIndex]; }
+
+    public CraftingView(IServiceProvider serviceProvider, ICraftingService craftingService, IFilterControlFactory filterControlFactory, IStateManager<AppConfig> appManager)
     {
         _serviceProvider = serviceProvider;
         _craftingService = craftingService;
         _filterControlFactory = filterControlFactory;
+        _appManager = appManager;
 
         // Initialize controls
         _root = new StackPanel
@@ -59,7 +63,7 @@ internal sealed class CraftingView : IView
         _itemLocationComboBox = ControlsLibrary.MakeComboBox();
         Enum.GetNames<ItemLocation>()
             .ForEach(l => _itemLocationComboBox.Items.Add(l));
-        _itemLocationComboBox.SelectedIndex = 0;
+        _itemLocationComboBox.SelectedIndex = _appManager.State.CraftingConfig.ItemLocationIndex;
 
         _craftingStrategyComboBox = ControlsLibrary.MakeComboBox();
         _craftingStrategyTypes = [.. AppDomain.CurrentDomain.GetAssemblies()
@@ -68,22 +72,13 @@ internal sealed class CraftingView : IView
                 && t.IsClass
                 && !t.IsAbstract)];
         _craftingStrategyTypes.ForEach(t => _craftingStrategyComboBox.Items.Add(t.Name));
-        _craftingStrategyComboBox.SelectedIndex = 0;
+        _craftingStrategyComboBox.SelectedIndex = _appManager.State.CraftingConfig.CraftingStrategyIndex;
 
-        _itemCountUpDown = new NumericUpDown
-        {
-            Value = DefaultItemsToCraft,
-            Height = 30,
-            Width = 125,
-            Margin = new Thickness(4),
-            Increment = 1,
-            Minimum = 1,
-            FormatString = "0",
-        };
+        _itemCountUpDown = ControlsLibrary.MakeIntUpDown(value: _appManager.State.CraftingConfig.ItemsToCraft);
 
         _itemCountText = ControlsLibrary.MakeTextBlock(text: "Items to craft");
 
-        _currencyUsedUpDown = ControlsLibrary.MakeIntUpDown(value: DefaultCurrencyCountToUse);
+        _currencyUsedUpDown = ControlsLibrary.MakeIntUpDown(value: _appManager.State.CraftingConfig.CurrencyToUseCount);
 
         _currencyUsedText = ControlsLibrary.MakeTextBlock(text: "Currency to use");
 
@@ -92,6 +87,16 @@ internal sealed class CraftingView : IView
             Orientation = Orientation.Vertical,
             Margin = new Thickness(uniformLength: 0),
         };
+        _appManager.State.CraftingConfig.Filters
+            .ForEach(f => SerializationHelper.SerializedNameToType.TryGetValue(f.FilterTypeName)
+                .IfSome(filterType =>
+                {
+                    var filterControl = _filterControlFactory.Create(filterType);
+                    filterControl.Accept(f.Parameters);
+
+                    filterControl.AddTo(_selectedFilterPanel.Children);
+                    _selectedFilterControls.Add(filterControl);
+                }));
 
         _filterComboBox = ControlsLibrary.MakeComboBox();
         _filterTypes = [.. AppDomain.CurrentDomain.GetAssemblies()
@@ -102,11 +107,11 @@ internal sealed class CraftingView : IView
         _filterTypes.ForEach(t => _filterComboBox.Items.Add(t.Name));
         _filterComboBox.SelectedIndex = 0;
 
-        _addFilterButton = ControlsLibrary.MakeSquareButton(content: "x");
+        _addFilterButton = ControlsLibrary.MakeSquareButton(content: "+");
         _addFilterButton.HorizontalAlignment = HorizontalAlignment.Right;
         _addFilterButton.Click += (_, _) =>
         {
-            var filterControl = _filterControlFactory.Create(_filterTypes[_filterComboBox.SelectedIndex]);
+            var filterControl = _filterControlFactory.Create(SelectedFilterType);
 
             filterControl.AddTo(_selectedFilterPanel.Children);
             _selectedFilterControls.Add(filterControl);
@@ -118,7 +123,7 @@ internal sealed class CraftingView : IView
         _startCraftButton.HorizontalAlignment = HorizontalAlignment.Right;
         _startCraftButton.Click += (_, _) =>
         {
-            var strategy = _serviceProvider.GetRequiredKeyedService<ICraftingStrategy>(_craftingStrategyTypes[_craftingStrategyComboBox.SelectedIndex]);
+            var strategy = _serviceProvider.GetRequiredKeyedService<ICraftingStrategy>(SelectedCraftingStrategyType);
 
             var filters = _selectedFilterControls
                 .Where(c => !c.IsRemoved)
@@ -137,19 +142,35 @@ internal sealed class CraftingView : IView
                 _ => Option<int>.None,
             };
 
-            var itemsCount = _itemCountUpDown.Value.HasValue
-                ? (int)_itemCountUpDown.Value.Value
-                : DefaultItemsToCraft;
-
-            var maxAttempts = _currencyUsedUpDown.Value.HasValue
-                ? (int)_currencyUsedUpDown.Value.Value
-                : DefaultCurrencyCountToUse;
-
+            var itemsCount = (int?)_itemCountUpDown.Value ?? CraftingConfig.DefaultItemsToCraft;
+            var maxAttempts = (int?)_currencyUsedUpDown.Value ?? CraftingConfig.DefaultCurrencyToUseCount;
             var locationParams = new ItemLocationParams(itemLocation, inventoryPosition, Option<Vec2>.None);
 
+            // TODO: Make a dialog with instructions
             Thread.Sleep(TimeSpan.FromSeconds(1));
 
             _craftingService.CraftItems(strategy, filters, locationParams, itemsCount, maxAttempts);
+        };
+
+
+        _root.Unloaded += (_, _) =>
+        {
+            var selectedFilterState = _selectedFilterControls
+                .Where(f => !f.IsRemoved)
+                .Select(f => (SerializationHelper.TypeNameToSerializedName[f.FilterType.Name], f.Parameters))
+                .ToArray();
+
+            _appManager.Update(cfg => cfg with
+            {
+                CraftingConfig = cfg.CraftingConfig with
+                {
+                    ItemLocationIndex = _itemLocationComboBox.SelectedIndex,
+                    CraftingStrategyIndex = _craftingStrategyComboBox.SelectedIndex,
+                    ItemsToCraft = (int?)_itemCountUpDown.Value ?? CraftingConfig.DefaultItemsToCraft,
+                    CurrencyToUseCount = (int?)_currencyUsedUpDown.Value ?? CraftingConfig.DefaultCurrencyToUseCount,
+                    Filters = selectedFilterState,
+                }
+            });
         };
 
         // Define layout

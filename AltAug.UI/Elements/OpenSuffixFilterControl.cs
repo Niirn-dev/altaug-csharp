@@ -18,6 +18,8 @@ internal sealed class OpenSuffixFilterControl : IFilterControl
     private readonly Button _closeButton;
 
     public bool IsRemoved { get; private set; } = false;
+    public Type FilterType { get; } = typeof(OpenSuffixFilter);
+    public IFilterParams Parameters { get; } = new OpenSuffixFilterParameters();
 
     public OpenSuffixFilterControl()
     {
@@ -71,6 +73,16 @@ internal sealed class OpenSuffixFilterControl : IFilterControl
         };
 
         controls.Add(_root);
+    }
+
+    public void Accept(IFilterParams @params)
+    {
+        if (@params is not OpenSuffixFilterParameters)
+            // For potential logging
+            return;
+
+        // No parameters to apply for this control
+        return;
     }
 
     public IFilter MakeFilter() => new OpenSuffixFilter();

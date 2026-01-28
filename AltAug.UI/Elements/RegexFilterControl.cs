@@ -28,6 +28,8 @@ internal sealed class RegexFilterControl : IFilterControl
     private readonly Button _closeButton;
 
     public bool IsRemoved { get; private set; } = false;
+    public Type FilterType { get; } = typeof(RegexFilter);
+    public IFilterParams Parameters { get => new RegexFilterParameters(_regexTextBox.Text ?? string.Empty); }
 
     public RegexFilterControl(IStateManager<RegexLibraryStore> regexLibraryManager)
     {
@@ -125,6 +127,14 @@ internal sealed class RegexFilterControl : IFilterControl
         };
 
         controls.Add(_root);
+    }
+
+    public void Accept(IFilterParams @params)
+    {
+        if (@params is not RegexFilterParameters regexFilterParams)
+            return;
+
+        _regexTextBox.Text = regexFilterParams.RegexString;
     }
 
     public IFilter MakeFilter() => new RegexFilter(_regexTextBox.Text ?? string.Empty);

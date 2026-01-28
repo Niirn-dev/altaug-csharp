@@ -1,4 +1,7 @@
-﻿namespace AltAug.Domain.Models;
+﻿using AltAug.Domain.Interfaces;
+using AltAug.Domain.Models.Enums;
+
+namespace AltAug.Domain.Models;
 
 public readonly record struct AppConfig(
     CoordinatesConfig CoordinatesConfig,
@@ -18,13 +21,19 @@ public readonly record struct AppConfig(
         ),
         new(
             AutoGuiPause: AutomationConfig.DefaultAutoGuiPause,
-            EnablePerfLogging: false
+            EnablePerfLogging: AutomationConfig.DefaultPerfLogging
         ),
-        new()
+        new(
+            ItemLocationIndex: 0,
+            CraftingStrategyIndex: 0,
+            ItemsToCraft: CraftingConfig.DefaultItemsToCraft,
+            CurrencyToUseCount: CraftingConfig.DefaultCurrencyToUseCount,
+            Filters: []
+        )
     );
 }
 
-public record struct CoordinatesConfig(
+public readonly record struct CoordinatesConfig(
     Vec2 Item,
     Vec2 MapTopLeft,
     Vec2 MapBottomRight,
@@ -52,6 +61,17 @@ public readonly record struct Vec2(double X, double Y)
 public readonly record struct AutomationConfig(double AutoGuiPause, bool EnablePerfLogging)
 {
     public const double DefaultAutoGuiPause = 0.05;
+    public const bool DefaultPerfLogging = false;
 }
 
-public readonly record struct CraftingConfig();
+public readonly record struct CraftingConfig(
+    int ItemLocationIndex,
+    int CraftingStrategyIndex,
+    int ItemsToCraft,
+    int CurrencyToUseCount,
+    (string FilterTypeName, IFilterParams Parameters)[] Filters)
+{
+    public const ItemLocation DefaultItemLocation = ItemLocation.CurrencyTab;
+    public const int DefaultItemsToCraft = 1;
+    public const int DefaultCurrencyToUseCount = 20;
+}
