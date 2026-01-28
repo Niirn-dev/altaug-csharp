@@ -19,6 +19,7 @@ public abstract class StateManagerBase<TState> : IStateManager<TState>
 
         _serializer = new SerializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .WithTagMapping("!AffixFilterParameters", typeof(AffixFilterParameters))
             .WithTagMapping("!OpenPrefixFilterParameters", typeof(OpenPrefixFilterParameters))
             .WithTagMapping("!OpenSuffixFilterParameters", typeof(OpenSuffixFilterParameters))
             .WithTagMapping("!RegexFilterParameters", typeof(RegexFilterParameters))
@@ -26,6 +27,7 @@ public abstract class StateManagerBase<TState> : IStateManager<TState>
 
         _deserializer = new DeserializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .WithTagMapping("!AffixFilterParameters", typeof(AffixFilterParameters))
             .WithTagMapping("!OpenPrefixFilterParameters", typeof(OpenPrefixFilterParameters))
             .WithTagMapping("!OpenSuffixFilterParameters", typeof(OpenSuffixFilterParameters))
             .WithTagMapping("!RegexFilterParameters", typeof(RegexFilterParameters))

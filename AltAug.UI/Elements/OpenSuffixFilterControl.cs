@@ -24,15 +24,7 @@ internal sealed class OpenSuffixFilterControl : IFilterControl
     public OpenSuffixFilterControl()
     {
         // Initialize controls
-        _root = new()
-        {
-            BorderBrush = Brushes.DimGray,
-            BorderThickness = new Thickness(uniformLength: 1),
-            CornerRadius = new CornerRadius(uniformRadius: 5),
-            Margin = new Thickness(uniformLength: 2),
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            MaxWidth = 600,
-        };
+        _root = ControlsLibrary.MakeFilterBorder();
 
         _headerPanel = new()
         {
@@ -64,6 +56,16 @@ internal sealed class OpenSuffixFilterControl : IFilterControl
         _root.Child = _headerPanel;
     }
 
+    public void Accept(IFilterParams @params)
+    {
+        if (@params is not OpenSuffixFilterParameters)
+            // For potential logging
+            return;
+
+        // No parameters to apply for this control
+        return;
+    }
+
     public void AddTo(Controls controls)
     {
         _closeButton.Click += (_, _) =>
@@ -73,16 +75,6 @@ internal sealed class OpenSuffixFilterControl : IFilterControl
         };
 
         controls.Add(_root);
-    }
-
-    public void Accept(IFilterParams @params)
-    {
-        if (@params is not OpenSuffixFilterParameters)
-            // For potential logging
-            return;
-
-        // No parameters to apply for this control
-        return;
     }
 
     public IFilter MakeFilter() => new OpenSuffixFilter();

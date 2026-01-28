@@ -124,12 +124,8 @@ internal sealed partial class ConfigurationView : IView
         });
         _mainPanel.Children.Add(delayStack);
 
-        _extraLoggingCheckBox = new()
-        {
-            Content = "Enable performance logging",
-            IsChecked = _appManager.State.AutomationConfig.EnablePerfLogging,
-            Margin = new Thickness(horizontal: 10, vertical: 5),
-        };
+        _extraLoggingCheckBox = ControlsLibrary.MakeCheckBox(content: "Enable performance logging");
+        _extraLoggingCheckBox.IsChecked = _appManager.State.AutomationConfig.EnablePerfLogging;
         _extraLoggingCheckBox.IsCheckedChanged += (_, _) => _appManager.Update(
             cfg => cfg with
             {

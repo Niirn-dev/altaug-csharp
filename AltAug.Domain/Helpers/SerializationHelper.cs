@@ -6,6 +6,7 @@ public static class SerializationHelper
 {
     public static readonly IReadOnlyDictionary<string, string> TypeNameToSerializedName = new Dictionary<string, string>()
     {
+        [ typeof(AffixFilter).Name] = nameof(AffixFilter),
         [ typeof(OpenPrefixFilter).Name] = nameof(OpenPrefixFilter),
         [ typeof(OpenSuffixFilter).Name] = nameof(OpenSuffixFilter),
         [ typeof(RegexFilter).Name] = nameof(RegexFilter),
@@ -13,6 +14,7 @@ public static class SerializationHelper
 
     public static readonly IReadOnlyDictionary<string, Type> SerializedNameToType = new Dictionary<string, Type>()
     {
+        [ nameof(AffixFilter) ] = typeof(AffixFilter),
         [ nameof(OpenPrefixFilter) ] = typeof(OpenPrefixFilter),
         [ nameof(OpenSuffixFilter) ] = typeof(OpenSuffixFilter),
         [ nameof(RegexFilter) ] = typeof(RegexFilter),

@@ -9,7 +9,7 @@ internal interface IFilterControl
     Type FilterType { get; }
     IFilterParams Parameters { get; }
 
-    void AddTo(Controls controls);
     void Accept(IFilterParams @params);
+    void AddTo(Controls controls);
     IFilter MakeFilter();
 }

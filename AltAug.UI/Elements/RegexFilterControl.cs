@@ -36,15 +36,7 @@ internal sealed class RegexFilterControl : IFilterControl
         // Initialize controls
         _regexLibrary = new(regexLibraryManager);
 
-        _root = new()
-        {
-            BorderBrush = Brushes.DimGray,
-            BorderThickness = new Thickness(uniformLength: 1),
-            CornerRadius = new CornerRadius(uniformRadius: 5),
-            Margin = new Thickness(uniformLength: 2),
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            MaxWidth = 600,
-        };
+        _root = ControlsLibrary.MakeFilterBorder();
 
         _filterPanel = new()
         {
@@ -63,30 +55,12 @@ internal sealed class RegexFilterControl : IFilterControl
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        _titleText = new()
-        {
-            Text = ControlTitle,
-            FontWeight = FontWeight.Bold,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(uniformLength: 2),
-        };
+        _titleText = ControlsLibrary.MakeTitleTextBlock(text: ControlTitle);
 
-        _regexTextBox = new()
-        {
-            Height = 30,
-            MinWidth = 300,
-            Margin = new Thickness(4),
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-        };
+        _regexTextBox = ControlsLibrary.MakeTextBox(text: string.Empty);
 
-        _openLibraryButton = new()
-        {
-            Content = "RegEx Library",
-            Height = 30,
-            Margin = new Thickness(4),
-            HorizontalAlignment = HorizontalAlignment.Right,
-        };
+        _openLibraryButton = ControlsLibrary.MakeFixedHeightButton(content: "RegEx Library");
+        _openLibraryButton.HorizontalAlignment = HorizontalAlignment.Right;
         _openLibraryButton.Click += async (_, _) =>
         {
             var result = await _regexLibrary.OpenDialogAsync();
@@ -95,14 +69,8 @@ internal sealed class RegexFilterControl : IFilterControl
                 _regexTextBox.Text = _regexLibrary.RegexString;
         };
 
-        _closeButton = new()
-        {
-            Content = "x",
-            Height = 30,
-            Width = 30,
-            Margin = new Thickness(4),
-            HorizontalAlignment = HorizontalAlignment.Right,
-        };
+        _closeButton = ControlsLibrary.MakeSquareButton(content: "x");
+        _closeButton.HorizontalAlignment = HorizontalAlignment.Right;
 
         // Define layout
         _headerPanel.Children.Add(_titleText);
@@ -118,6 +86,14 @@ internal sealed class RegexFilterControl : IFilterControl
         _root.Child = _filterPanel;
     }
 
+    public void Accept(IFilterParams @params)
+    {
+        if (@params is not RegexFilterParameters regexFilterParams)
+            return;
+
+        _regexTextBox.Text = regexFilterParams.RegexString;
+    }
+
     public void AddTo(Controls controls)
     {
         _closeButton.Click += (_, _) =>
@@ -127,14 +103,6 @@ internal sealed class RegexFilterControl : IFilterControl
         };
 
         controls.Add(_root);
-    }
-
-    public void Accept(IFilterParams @params)
-    {
-        if (@params is not RegexFilterParameters regexFilterParams)
-            return;
-
-        _regexTextBox.Text = regexFilterParams.RegexString;
     }
 
     public IFilter MakeFilter() => new RegexFilter(_regexTextBox.Text ?? string.Empty);

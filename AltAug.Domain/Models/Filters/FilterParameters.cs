@@ -2,6 +2,12 @@
 
 namespace AltAug.Domain.Models.Filters;
 
+public readonly record struct AffixFilterParameters(
+    string NameFilter,
+    string DescriptionFilter,
+    int MaxTierFilter,
+    bool IsTierFilterEnabled) : IFilterParams;
+
 public readonly record struct OpenPrefixFilterParameters() : IFilterParams;
 
 public readonly record struct OpenSuffixFilterParameters() : IFilterParams;

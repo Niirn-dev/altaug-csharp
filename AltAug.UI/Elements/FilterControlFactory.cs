@@ -11,6 +11,7 @@ internal sealed class FilterControlFactory(IStateManager<RegexLibraryStore> rege
 
     public IFilterControl Create(Type filterType) => filterType switch
     {
+        Type t when t == typeof(AffixFilter) => new AffixFilterControl(),
         Type t when t == typeof(OpenPrefixFilter) => new OpenPrefixFilterControl(),
         Type t when t == typeof(OpenSuffixFilter) => new OpenSuffixFilterControl(),
         Type t when t == typeof(RegexFilter) => new RegexFilterControl(_regexLibraryManager),

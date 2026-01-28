@@ -50,6 +50,7 @@ internal static class ControlsLibrary
     {
         Height = 30,
         Text = text,
+        Margin = new Thickness(uniformLength: 4),
         HorizontalAlignment = HorizontalAlignment.Stretch,
     };
 
@@ -69,5 +70,22 @@ internal static class ControlsLibrary
         Increment = 1,
         Minimum = 1,
         FormatString = "0",
+    };
+
+    public static Border MakeFilterBorder() => new()
+    {
+        BorderBrush = Brushes.DimGray,
+        BorderThickness = new Thickness(uniformLength: 1),
+        CornerRadius = new CornerRadius(uniformRadius: 5),
+        Margin = new Thickness(uniformLength: 2),
+        HorizontalAlignment = HorizontalAlignment.Stretch,
+        MaxWidth = 600,
+    };
+
+    public static CheckBox MakeCheckBox(object content) => new()
+    {
+        Content = content,
+        Height = 30,
+        Margin = new Thickness(uniformLength: 4),
     };
 }

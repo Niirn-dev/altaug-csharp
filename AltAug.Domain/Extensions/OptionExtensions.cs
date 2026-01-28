@@ -8,6 +8,14 @@ public static class OptionExtensions
         ? that
         : Option<T>.None;
 
+    public static Option<string> ToOpt(this string? that, bool treatEmptyAsNone)
+    {
+        if (that is null || treatEmptyAsNone && string.IsNullOrEmpty(that))
+            return Option<string>.None;
+
+        return that;
+    }
+
     public static Option<TEnum> ParseEnum<TEnum>(this string that)
         where TEnum : struct, Enum
         => Enum.TryParse<TEnum>(that, out var enumValue)
