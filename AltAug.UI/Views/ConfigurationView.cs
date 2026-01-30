@@ -48,12 +48,10 @@ internal sealed partial class ConfigurationView : IView
             Margin = new Thickness(0),
         };
 
-        _mainPanel.Children.Add(ControlsLibrary.MakeSingleLineTextBlock(text: "Configure Coordinates:"));
-
         var configButtonsStack = new StackPanel
         {
             Orientation = Orientation.Horizontal,
-            Margin = new Thickness(10),
+            Margin = new Thickness(uniformLength: 4),
             
         };
         configButtonsStack.Children.Add(

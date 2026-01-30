@@ -79,7 +79,6 @@ internal sealed class RegexFilterControl : IFilterControl
             .AddControl(_openLibraryButton, row: 0, column: 1);
 
         _filterPanel.Children.Add(_headerPanel);
-        _filterPanel.Children.Add(new Separator { Margin = new Thickness(0, vertical: 4) });
         _filterPanel.Children.Add(_mainGrid);
 
         _root.Child = _filterPanel;

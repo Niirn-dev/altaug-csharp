@@ -33,10 +33,10 @@ internal static class ControlsLibrary
 
     public static TextBlock MakeTitleTextBlock(string text) => new()
     {
-        Height = 30,
         Text = text,
+        FontSize = 16,
         FontWeight = FontWeight.Bold,
-        Margin = new Thickness(left: 0, top: 0, right: 0, bottom: 5),
+        Margin = new Thickness(uniformLength: 2),
         VerticalAlignment = VerticalAlignment.Center,
         TextAlignment = TextAlignment.Left,
     };
@@ -75,7 +75,8 @@ internal static class ControlsLibrary
         AcceptsReturn = true,
         TextWrapping = TextWrapping.Wrap,
         MinHeight = 150,
-        VerticalAlignment = VerticalAlignment.Stretch,
+        MaxHeight = 250,
+        VerticalAlignment = VerticalAlignment.Top,
         HorizontalAlignment = HorizontalAlignment.Stretch,
         Text = string.Empty,
     };
@@ -83,6 +84,7 @@ internal static class ControlsLibrary
     public static ComboBox MakeComboBox() => new()
     {
         Height = 30,
+        Width = 200,
         HorizontalAlignment = HorizontalAlignment.Stretch,
         Margin = new Thickness(uniformLength: 4),
     };

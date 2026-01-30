@@ -52,7 +52,9 @@ internal sealed class MainWindow : AppWindow
 
         Title = "Alt-Aug C# Edition";
         Width = 800;
-        Height = 600;
+        Height = 800;
+        CanResize = false;
+
         var root = new Grid
         {
             RowDefinitions = RowDefinitions.Parse(

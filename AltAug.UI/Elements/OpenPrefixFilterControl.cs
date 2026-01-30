@@ -1,10 +1,8 @@
 ﻿using AltAug.Domain.Interfaces;
 using AltAug.Domain.Models.Filters;
 using AltAug.UI.Interfaces;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using Avalonia.Media;
 
 namespace AltAug.UI.Elements;
 
@@ -31,23 +29,10 @@ internal sealed class OpenPrefixFilterControl : IFilterControl
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
-        _titleText = new()
-        {
-            Text = ControlTitle,
-            FontWeight = FontWeight.Bold,
-            HorizontalAlignment = HorizontalAlignment.Left,
-            VerticalAlignment = VerticalAlignment.Center,
-            Margin = new Thickness(uniformLength: 2),
-        };
+        _titleText = ControlsLibrary.MakeTitleTextBlock(text: ControlTitle);
 
-        _closeButton = new()
-        {
-            Content = "x",
-            Height = 30,
-            Width = 30,
-            Margin = new Thickness(4),
-            HorizontalAlignment = HorizontalAlignment.Right,
-        };
+        _closeButton = ControlsLibrary.MakeSquareButton(content: "x");
+        _closeButton.HorizontalAlignment = HorizontalAlignment.Right;
 
         // Define layout
         _headerPanel.Children.Add(_titleText);
