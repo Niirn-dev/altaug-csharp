@@ -69,17 +69,29 @@ internal static class ControlsLibrary
         TextAlignment = TextAlignment.Left,
     };
 
-    public static TextBox MakeLogTextBox() => new()
+    public static TextBox MakeLogTextBox()
     {
-        IsReadOnly = true,
-        AcceptsReturn = true,
-        TextWrapping = TextWrapping.Wrap,
-        MinHeight = 150,
-        MaxHeight = 250,
-        VerticalAlignment = VerticalAlignment.Top,
-        HorizontalAlignment = HorizontalAlignment.Stretch,
-        Text = string.Empty,
-    };
+        var tb = new TextBox()
+        {
+            IsReadOnly = true,
+            AcceptsReturn = true,
+            TextWrapping = TextWrapping.Wrap,
+            MinHeight = 150,
+            MaxHeight = 250,
+            VerticalAlignment = VerticalAlignment.Top,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Text = string.Empty,
+        };
+        tb.TextChanged += (s, args) =>
+        {
+            if (s is not TextBox box)
+                return;
+
+            box.CaretIndex = box.Text?.Length ?? 0;
+        };
+
+        return tb;
+    }
 
     public static ComboBox MakeComboBox() => new()
     {
