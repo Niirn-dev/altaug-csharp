@@ -4,7 +4,6 @@ using AltAug.UI.Extensions;
 using AltAug.UI.Logging;
 using Avalonia.Controls;
 using Avalonia.Threading;
-using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls;
 using Microsoft.Extensions.Logging;
 
@@ -12,6 +11,13 @@ namespace AltAug.UI.Elements.Dialogs;
 
 internal sealed class CraftingProgressDialog
 {
+    private record CraftingParameters(
+        ICraftingStrategy Strategy,
+        IReadOnlyCollection<IFilter> Conditions,
+        ItemLocationParams LocationParams,
+        int ItemsCount,
+        int MaxAttempts);
+
     private const string DialogTitle = "Crafting Progress";
     private const string InstructionsText =
 @"The crafting will start in a few seconds, please change focus to PoE window.
@@ -28,6 +34,7 @@ To interrupt the crafting process you can move the cursor to the top-left corner
 
     private CancellationTokenSource _cts = null!;
     private ContentDialog _dialog = new();
+    private CraftingParameters _craftingParameters = null!;
 
     public CraftingProgressDialog(IStateManager<AppConfig> appManager, IAutomationService automationService, ICraftingService craftingService, ILoggerFactory loggerFactory)
     {
@@ -67,22 +74,27 @@ To interrupt the crafting process you can move the cursor to the top-left corner
         {
             Title = DialogTitle,
             Content = _root,
+            PrimaryButtonText = "Repeat",
+            IsPrimaryButtonEnabled = false,
             CloseButtonText = "Close",
         };
+        _craftingParameters = new(strategy, conditions, locationParams, itemsCount, maxAttempts);
 
-        // Start crafting when the dialog opens
-        _dialog.Opened += StartKillSwitchWatchAndCrafting(strategy, conditions, locationParams, itemsCount, maxAttempts);
+        _dialog.Opened += async (_, _) => await StartCraftingWithKillSwitchAsync().ConfigureAwait(false);
+        _dialog.PrimaryButtonClick += async (_, args) =>
+        {
+            args.Cancel = true;
+            _logTextBox.Text = string.Empty;
+            await StartCraftingWithKillSwitchAsync().ConfigureAwait(false);
+        };
 
         return await _dialog.ShowAsync();
     }
 
-    private TypedEventHandler<ContentDialog, EventArgs> StartKillSwitchWatchAndCrafting(
-        ICraftingStrategy strategy,
-        IReadOnlyCollection<IFilter> conditions,
-        ItemLocationParams locationParams,
-        int itemsCount,
-        int maxAttempts) => async (_, _) =>
+    private async Task StartCraftingWithKillSwitchAsync()
     {
+        Dispatcher.UIThread.Post(() => _dialog.IsPrimaryButtonEnabled = false);
+
         _logger.LogInformation("Waiting for the user to switch focus to the PoE window...");
         await Task.Delay(TimeSpan.FromSeconds(_appManager.State.AutomationConfig.CraftingStartDelay)).ConfigureAwait(false);
 
@@ -111,7 +123,16 @@ To interrupt the crafting process you can move the cursor to the top-left corner
         try
         {
             _logger.LogInformation("Starting the crafting process...");
-            await _craftingService.CraftItemsAsync(strategy, conditions, locationParams, itemsCount, maxAttempts, _cts.Token).ConfigureAwait(false);
+
+            await _craftingService.CraftItemsAsync(
+                _craftingParameters.Strategy,
+                _craftingParameters.Conditions,
+                _craftingParameters.LocationParams,
+                _craftingParameters.ItemsCount,
+                _craftingParameters.MaxAttempts,
+                _cts.Token)
+                .ConfigureAwait(false);
+
             _logger.LogInformation("The crafting is done.");
         }
         catch (OperationCanceledException)
@@ -122,6 +143,8 @@ To interrupt the crafting process you can move the cursor to the top-left corner
         {
             _cts.Dispose();
             timer.Stop();
+
+            Dispatcher.UIThread.Post(() => _dialog.IsPrimaryButtonEnabled = true);
         }
-    };
+    }
 }
