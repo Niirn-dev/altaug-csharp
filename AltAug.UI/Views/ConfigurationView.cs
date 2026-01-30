@@ -1,6 +1,7 @@
 ﻿using AltAug.Domain.Interfaces;
 using AltAug.Domain.Models;
 using AltAug.UI.Elements;
+using AltAug.UI.Extensions;
 using AltAug.UI.Interfaces;
 using Avalonia;
 using Avalonia.Controls;
@@ -16,6 +17,8 @@ namespace AltAug.UI.Views;
 internal sealed partial class ConfigurationView : IView
 {
     private const string ViewTitle = "Configuration";
+    private const string AutoGuiPauseHintText = "Set pause after each action (recommended higher than in-game ping)";
+    private const string CraftingDelayHintText = "Delay before crafting starts to swap focus to PoE window";
     private const int ConfigurationButtonSingleRowHeight = 61;
     private const int ConfigurationButtonDoubleRowHeight = 126;
     private const int ConfigurationButtonWidth = 63;
@@ -26,7 +29,12 @@ internal sealed partial class ConfigurationView : IView
 
     private readonly Expander _root;
     private readonly StackPanel _mainPanel;
-    private readonly CheckBox _extraLoggingCheckBox;
+
+    private readonly Grid _automationConfigGrid;
+    private readonly TextBlock _autoGuiPauseHintTextBlock;
+    private readonly TextBlock _craftingDelayHintTextBlock;
+    private readonly NumericUpDown _autoGuiPauseUpDown;
+    private readonly NumericUpDown _craftingDelayUpDown;
 
     public ConfigurationView(IStateManager<AppConfig> stateManager, IAutomationService automationService, ILogger<ConfigurationView> logger)
     {
@@ -40,7 +48,7 @@ internal sealed partial class ConfigurationView : IView
             Margin = new Thickness(0),
         };
 
-        _mainPanel.Children.Add(ControlsLibrary.MakeTextBlock(text: "Configure Coordinates:"));
+        _mainPanel.Children.Add(ControlsLibrary.MakeSingleLineTextBlock(text: "Configure Coordinates:"));
 
         var configButtonsStack = new StackPanel
         {
@@ -93,12 +101,15 @@ internal sealed partial class ConfigurationView : IView
             .ForEach(configButtonsStack.Children.Add);
         _mainPanel.Children.Add(configButtonsStack);
 
-        var delayStack = new StackPanel
+        _automationConfigGrid = new()
         {
-            Orientation = Orientation.Horizontal,
+            ColumnDefinitions = ColumnDefinitions.Parse("Auto, *"),
+            RowDefinitions = RowDefinitions.Parse("Auto, Auto"),
         };
 
-        var autoGuiDelayUpDown = new NumericUpDown
+        _autoGuiPauseHintTextBlock = ControlsLibrary.MakeSingleLineTextBlock(text: AutoGuiPauseHintText);
+
+        _autoGuiPauseUpDown = new()
         {
             Increment = 0.005m,
             Value = (decimal)_appManager.State.AutomationConfig.AutoGuiPause,
@@ -107,8 +118,8 @@ internal sealed partial class ConfigurationView : IView
             Width = 120,
             Margin = new Thickness(10, 5),
         };
-        autoGuiDelayUpDown.ValueChanged += (src, args) => _appManager.Update(
-            cfg => cfg with 
+        _autoGuiPauseUpDown.ValueChanged += (src, args) => _appManager.Update(
+            cfg => cfg with
             {
                 AutomationConfig = cfg.AutomationConfig with
                 {
@@ -116,29 +127,35 @@ internal sealed partial class ConfigurationView : IView
                 }
             });
 
-        delayStack.Children.Add(autoGuiDelayUpDown);
-        delayStack.Children.Add(new TextBlock
-        {
-            Text = "Set pause after each action (recommended higher than in-game ping)",
-            VerticalAlignment = VerticalAlignment.Center,
-        });
-        _mainPanel.Children.Add(delayStack);
+        _craftingDelayHintTextBlock = ControlsLibrary.MakeSingleLineTextBlock(text: CraftingDelayHintText);
 
-        _extraLoggingCheckBox = ControlsLibrary.MakeCheckBox(content: "Enable performance logging");
-        _extraLoggingCheckBox.IsChecked = _appManager.State.AutomationConfig.EnablePerfLogging;
-        _extraLoggingCheckBox.IsCheckedChanged += (_, _) => _appManager.Update(
+        _craftingDelayUpDown = new()
+        {
+            Increment = 0.1m,
+            Value = (decimal)_appManager.State.AutomationConfig.CraftingStartDelay,
+            Minimum = 0.5m,
+            Maximum = 2.5m,
+            Width = 120,
+            Margin = new Thickness(10, 5),
+        };
+        _craftingDelayUpDown.ValueChanged += (_, args) => _appManager.Update(
             cfg => cfg with
             {
                 AutomationConfig = cfg.AutomationConfig with
                 {
-                    EnablePerfLogging = _extraLoggingCheckBox.IsChecked ?? AutomationConfig.DefaultPerfLogging,
+                    CraftingStartDelay = (double?)args.NewValue ?? AutomationConfig.DefaultCraftingStartDelay,
                 }
             });
 
-        _mainPanel.Children.Add(_extraLoggingCheckBox);
+        // Define layout
+        _automationConfigGrid.AddControl(_autoGuiPauseUpDown, row: 0, column: 0)
+            .AddControl(_autoGuiPauseHintTextBlock, row: 0, column: 1)
+            .AddControl(_craftingDelayUpDown, row: 1, column: 0)
+            .AddControl(_craftingDelayHintTextBlock, row: 1, column: 1);
+
+        _mainPanel.Children.Add(_automationConfigGrid);
 
         var header = ControlsLibrary.MakeTitleTextBlock(text: ViewTitle);
-        header.VerticalAlignment = VerticalAlignment.Center;
         header.Margin = new Thickness(uniformLength: 0);
         _root = new()
         {

@@ -37,13 +37,26 @@ internal static class ControlsLibrary
         Text = text,
         FontWeight = FontWeight.Bold,
         Margin = new Thickness(left: 0, top: 0, right: 0, bottom: 5),
+        VerticalAlignment = VerticalAlignment.Center,
+        TextAlignment = TextAlignment.Left,
     };
 
-    public static TextBlock MakeTextBlock(string text) => new()
+    public static TextBlock MakeVariableHeightTextBlock(string text) => new()
+    {
+        Text = text,
+        Margin = new Thickness(uniformLength: 4),
+        VerticalAlignment = VerticalAlignment.Center,
+        TextAlignment = TextAlignment.Left,
+        TextWrapping = TextWrapping.Wrap,
+    };
+
+    public static TextBlock MakeSingleLineTextBlock(string text) => new()
     {
         Height = 30,
         Text = text,
         Margin = new Thickness(uniformLength: 4),
+        VerticalAlignment = VerticalAlignment.Center,
+        TextAlignment = TextAlignment.Left,
     };
 
     public static TextBox MakeTextBox(string text) => new()
@@ -52,6 +65,19 @@ internal static class ControlsLibrary
         Text = text,
         Margin = new Thickness(uniformLength: 4),
         HorizontalAlignment = HorizontalAlignment.Stretch,
+        VerticalAlignment = VerticalAlignment.Center,
+        TextAlignment = TextAlignment.Left,
+    };
+
+    public static TextBox MakeLogTextBox() => new()
+    {
+        IsReadOnly = true,
+        AcceptsReturn = true,
+        TextWrapping = TextWrapping.Wrap,
+        MinHeight = 150,
+        VerticalAlignment = VerticalAlignment.Stretch,
+        HorizontalAlignment = HorizontalAlignment.Stretch,
+        Text = string.Empty,
     };
 
     public static ComboBox MakeComboBox() => new()

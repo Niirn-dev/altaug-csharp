@@ -14,6 +14,8 @@ internal sealed class AutomationService(IStateManager<AppConfig> stateManager) :
 {
     private readonly IStateManager<AppConfig> _stateManager = stateManager;
 
+    public Option<Vec2> GetMousePosition() => WindowsNativeHelper.GetCursorPosition();
+
     public Option<Vec2> RecordMousePosition(int pollRate = 20, int failsafeTimeoutSeconds = 10)
     {
         InputSimulator inputSimulator = new();

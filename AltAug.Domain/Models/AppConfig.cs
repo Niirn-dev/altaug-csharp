@@ -21,7 +21,7 @@ public readonly record struct AppConfig(
         ),
         new(
             AutoGuiPause: AutomationConfig.DefaultAutoGuiPause,
-            EnablePerfLogging: AutomationConfig.DefaultPerfLogging
+            CraftingStartDelay: AutomationConfig.DefaultCraftingStartDelay
         ),
         new(
             ItemLocationIndex: 0,
@@ -58,10 +58,10 @@ public readonly record struct Vec2(double X, double Y)
         Y: left.Y / right);
 }
 
-public readonly record struct AutomationConfig(double AutoGuiPause, bool EnablePerfLogging)
+public readonly record struct AutomationConfig(double AutoGuiPause, double CraftingStartDelay)
 {
     public const double DefaultAutoGuiPause = 0.05;
-    public const bool DefaultPerfLogging = false;
+    public const double DefaultCraftingStartDelay = 1.5;
 }
 
 public readonly record struct CraftingConfig(

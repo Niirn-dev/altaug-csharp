@@ -4,6 +4,7 @@ using AltAug.Domain.Interfaces;
 using AltAug.Domain.Models;
 using AltAug.Domain.Models.Enums;
 using AltAug.UI.Elements;
+using AltAug.UI.Elements.Dialogs;
 using AltAug.UI.Extensions;
 using AltAug.UI.Interfaces;
 using Avalonia;
@@ -12,6 +13,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using LanguageExt;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MoreLinq;
 
 namespace AltAug.UI.Views;
@@ -21,9 +23,9 @@ internal sealed class CraftingView : IView
     private const string ViewTitle = "Crafting";
 
     private readonly IServiceProvider _serviceProvider;
-    private readonly ICraftingService _craftingService;
     private readonly IFilterControlFactory _filterControlFactory;
     private readonly IStateManager<AppConfig> _appManager;
+    private readonly CraftingProgressDialog _craftingDialog;
 
     private readonly StackPanel _root;
     private readonly ComboBox _itemLocationComboBox;
@@ -46,12 +48,18 @@ internal sealed class CraftingView : IView
     private Type SelectedCraftingStrategyType { get => _craftingStrategyTypes[_craftingStrategyComboBox.SelectedIndex]; }
     private Type SelectedFilterType { get => _filterTypes[_filterComboBox.SelectedIndex]; }
 
-    public CraftingView(IServiceProvider serviceProvider, ICraftingService craftingService, IFilterControlFactory filterControlFactory, IStateManager<AppConfig> appManager)
+    public CraftingView(
+        IServiceProvider serviceProvider,
+        IAutomationService automationService,
+        ICraftingService craftingService,
+        IFilterControlFactory filterControlFactory,
+        IStateManager<AppConfig> appManager,
+        ILoggerFactory loggerFactory)
     {
         _serviceProvider = serviceProvider;
-        _craftingService = craftingService;
         _filterControlFactory = filterControlFactory;
         _appManager = appManager;
+        _craftingDialog = new(appManager, automationService, craftingService, loggerFactory);
 
         // Initialize controls
         _root = new StackPanel
@@ -76,11 +84,11 @@ internal sealed class CraftingView : IView
 
         _itemCountUpDown = ControlsLibrary.MakeIntUpDown(value: _appManager.State.CraftingConfig.ItemsToCraft);
 
-        _itemCountText = ControlsLibrary.MakeTextBlock(text: "Items to craft");
+        _itemCountText = ControlsLibrary.MakeSingleLineTextBlock(text: "Items to craft");
 
         _currencyUsedUpDown = ControlsLibrary.MakeIntUpDown(value: _appManager.State.CraftingConfig.CurrencyToUseCount);
 
-        _currencyUsedText = ControlsLibrary.MakeTextBlock(text: "Currency to use");
+        _currencyUsedText = ControlsLibrary.MakeSingleLineTextBlock(text: "Currency to use");
 
         _selectedFilterPanel = new StackPanel
         {
@@ -121,7 +129,7 @@ internal sealed class CraftingView : IView
 
         _startCraftButton = ControlsLibrary.MakeFixedHeightButton(content: "Start crafting");
         _startCraftButton.HorizontalAlignment = HorizontalAlignment.Right;
-        _startCraftButton.Click += (_, _) =>
+        _startCraftButton.Click += async (_, _) =>
         {
             var strategy = _serviceProvider.GetRequiredKeyedService<ICraftingStrategy>(SelectedCraftingStrategyType);
 
@@ -146,10 +154,7 @@ internal sealed class CraftingView : IView
             var maxAttempts = (int?)_currencyUsedUpDown.Value ?? CraftingConfig.DefaultCurrencyToUseCount;
             var locationParams = new ItemLocationParams(itemLocation, inventoryPosition, Option<Vec2>.None);
 
-            // TODO: Make a dialog with instructions
-            Thread.Sleep(TimeSpan.FromSeconds(1));
-
-            _craftingService.CraftItems(strategy, filters, locationParams, itemsCount, maxAttempts);
+            await _craftingDialog.OpenDialogAsync(strategy, filters, locationParams, itemsCount, maxAttempts);
         };
 
 

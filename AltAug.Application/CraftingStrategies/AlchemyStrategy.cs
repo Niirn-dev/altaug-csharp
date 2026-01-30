@@ -10,7 +10,11 @@ internal sealed partial class AlchemyStrategy(IAutomationService automationServi
     private readonly IAutomationService _automationService = automationService;
     private readonly ILogger<AlchemyStrategy> _logger = logger;
 
-    public int ExecuteOperation(IReadOnlyCollection<IFilter> conditions, ItemLocationParams locationParams, int maxAttempts)
+    public async Task<int> ExecuteOperationAsync(
+        IReadOnlyCollection<IFilter> conditions,
+        ItemLocationParams locationParams,
+        int maxAttempts,
+        CancellationToken cancellationToken)
     {
         var item = new ItemInfo(_automationService.GetItemDescription(locationParams));
         LogInfoBeginningCraft(nameof(AlchemyStrategy), item);
@@ -30,6 +34,8 @@ internal sealed partial class AlchemyStrategy(IAutomationService automationServi
         var (alchemyUsedCount, scourUsedCount) = (0, 0);
         while (Math.Max(alchemyUsedCount, scourUsedCount) < maxAttempts)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (item.Rarity is ItemRarity.Normal)
             {
                 currencyOrbUsed = CurrencyOrb.Alchemy;

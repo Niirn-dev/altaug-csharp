@@ -12,7 +12,11 @@ internal sealed partial class AlterationStrategy(IAutomationService automationSe
     private readonly IAutomationService _automationService = automationService;
     private readonly ILogger<AlterationStrategy> _logger = logger;
 
-    public int ExecuteOperation(IReadOnlyCollection<IFilter> conditions, ItemLocationParams locationParams, int maxAttempts)
+    public async Task<int> ExecuteOperationAsync(
+        IReadOnlyCollection<IFilter> conditions,
+        ItemLocationParams locationParams,
+        int maxAttempts,
+        CancellationToken cancellationToken)
     {
         var item = new ItemInfo(_automationService.GetItemDescription(locationParams));
         LogInfoBeginningCraft(nameof(AlterationStrategy), item);
@@ -32,6 +36,8 @@ internal sealed partial class AlterationStrategy(IAutomationService automationSe
         var (altUsedCount, augUsedCount) = (0, 0);
         while (Math.Max(altUsedCount, augUsedCount) < maxAttempts)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (conditions.Any(c => c is OpenPrefixFilter or OpenSuffixFilter)
                 || item.IsAffixesFull())
             {

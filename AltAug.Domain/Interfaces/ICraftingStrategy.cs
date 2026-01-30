@@ -4,5 +4,5 @@ namespace AltAug.Domain.Interfaces;
 
 public interface ICraftingStrategy
 {
-    int ExecuteOperation(IReadOnlyCollection<IFilter> conditions, ItemLocationParams locationParams, int maxAttempts);
+    Task<int> ExecuteOperationAsync(IReadOnlyCollection<IFilter> conditions, ItemLocationParams locationParams, int maxAttempts, CancellationToken cancellationToken);
 }

@@ -3,8 +3,6 @@ using AltAug.UI.Extensions;
 using AltAug.UI.Interfaces;
 using AltAug.UI.Logging;
 using Avalonia.Controls;
-using Avalonia.Layout;
-using Avalonia.Media;
 using Microsoft.Extensions.Logging;
 
 namespace AltAug.UI.Views;
@@ -23,23 +21,14 @@ public sealed class LoggingView(ILoggerFactory loggerFactory) : IView
         };
         var clearButton = ControlsLibrary.MakeFixedHeightButton(content: "Clear Log");
 
-        var logTextBox = new TextBox()
-        {
-            IsReadOnly = true,
-            AcceptsReturn = true,
-            TextWrapping = TextWrapping.Wrap,
-            MinHeight = 150,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            Text = string.Empty,
-        };
+        var logTextBox = ControlsLibrary.MakeLogTextBox();
         clearButton.Click += (_, _) => logTextBox.Text = string.Empty;
 
-        grid.AddControl(ControlsLibrary.MakeTitleTextBlock(text: ViewTitle), row: 0, column: 0);
-        grid.AddControl(clearButton, row: 1, column: 0);
-        grid.AddControl(logTextBox, row: 2, column: 0);
+        grid.AddControl(ControlsLibrary.MakeTitleTextBlock(text: ViewTitle), row: 0, column: 0)
+            .AddControl(clearButton, row: 1, column: 0)
+            .AddControl(logTextBox, row: 2, column: 0);
 
-        _loggerFactory.AddProvider(new TextBoxLoggerProvider(logTextBox));
+        _loggerFactory.AddProvider(new TextBoxLoggerProvider(logTextBox, useMinimalFormat: false));
 
         return grid;
     }

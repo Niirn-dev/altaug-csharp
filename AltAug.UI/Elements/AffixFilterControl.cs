@@ -70,8 +70,8 @@ internal sealed class AffixFilterControl : IFilterControl
         _closeButton = ControlsLibrary.MakeSquareButton(content: "x");
         _closeButton.HorizontalAlignment = HorizontalAlignment.Right;
 
-        _inputHeaderTextBlock_Name = ControlsLibrary.MakeTextBlock(text: InputHeader_Name);
-        _inputHeaderTextBlock_Description = ControlsLibrary.MakeTextBlock(text: InputHeader_Description);
+        _inputHeaderTextBlock_Name = ControlsLibrary.MakeSingleLineTextBlock(text: InputHeader_Name);
+        _inputHeaderTextBlock_Description = ControlsLibrary.MakeSingleLineTextBlock(text: InputHeader_Description);
         _inputHeaderTierEnabledCheckBox = ControlsLibrary.MakeCheckBox(content: InputHeader_Tier);
         _inputHeaderTierEnabledCheckBox.IsChecked = true;
 

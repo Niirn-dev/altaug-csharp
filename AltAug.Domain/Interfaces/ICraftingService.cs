@@ -4,10 +4,11 @@ namespace AltAug.Domain.Interfaces;
 
 public interface ICraftingService
 {
-    void CraftItems(
+    Task CraftItemsAsync(
         ICraftingStrategy strategy,
         IReadOnlyCollection<IFilter> conditions,
         ItemLocationParams locationParams,
         int itemsCount,
-        int maxAttempts);
+        int maxAttempts,
+        CancellationToken cancellationToken);
 }

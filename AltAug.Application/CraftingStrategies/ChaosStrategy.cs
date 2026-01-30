@@ -10,7 +10,11 @@ internal sealed partial class ChaosStrategy(IAutomationService automationService
     private readonly IAutomationService _automationService = automationService;
     private readonly ILogger<ChaosStrategy> _logger = logger;
 
-    public int ExecuteOperation(IReadOnlyCollection<IFilter> conditions, ItemLocationParams locationParams, int maxAttempts)
+    public async Task<int> ExecuteOperationAsync(
+        IReadOnlyCollection<IFilter> conditions,
+        ItemLocationParams locationParams,
+        int maxAttempts,
+        CancellationToken cancellationToken)
     {
         var item = new ItemInfo(_automationService.GetItemDescription(locationParams));
         LogInfoBeginningCraft(nameof(ChaosStrategy), item);
@@ -28,6 +32,8 @@ internal sealed partial class ChaosStrategy(IAutomationService automationService
 
         for (var attempt = 0; attempt < maxAttempts; attempt++)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             _automationService.UseCurrency(CurrencyOrb.Chaos, locationParams);
             item = new ItemInfo(_automationService.GetItemDescription(locationParams));
             LogInfoCurrencyUsed(CurrencyOrb.Chaos, item);

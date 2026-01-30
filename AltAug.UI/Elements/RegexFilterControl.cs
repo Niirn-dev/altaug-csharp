@@ -7,7 +7,6 @@ using AltAug.UI.Interfaces;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using Avalonia.Media;
 using FluentAvalonia.UI.Controls;
 
 namespace AltAug.UI.Elements;
