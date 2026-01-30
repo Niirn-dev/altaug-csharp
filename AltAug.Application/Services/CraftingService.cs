@@ -24,7 +24,7 @@ internal sealed class CraftingService : ICraftingService
 
             currencyUsed += await strategy.ExecuteOperationAsync(conditions, locationParams, maxAttempts - currencyUsed, cancellationToken);
 
-            locationParams = locationParams with { InventoryPosition = locationParams.InventoryPosition.Map(s => s++) };
+            locationParams = locationParams with { InventoryPosition = locationParams.InventoryPosition.Map(s => ++s) };
         }
     }
 }

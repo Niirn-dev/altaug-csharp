@@ -3,6 +3,7 @@ using AltAug.Domain.Helpers;
 using AltAug.Domain.Interfaces;
 using AltAug.Domain.Models;
 using AltAug.Domain.Models.Enums;
+using AltAug.Domain.Models.Filters;
 using AltAug.UI.Elements;
 using AltAug.UI.Elements.Dialogs;
 using AltAug.UI.Extensions;
@@ -111,7 +112,8 @@ internal sealed class CraftingView : IView
             .SelectMany(t => t.GetTypes())
             .Where(t => typeof(IFilter).IsAssignableFrom(t)
                 && t.IsClass
-                && !t.IsAbstract)];
+                && !t.IsAbstract)
+            .Except([typeof(RarityFilter)])]; // Ugly hack, internal filter. TODO: Not sure if want to make a control for it or do it properly later
         _filterTypes.ForEach(t => _filterComboBox.Items.Add(t.Name));
         _filterComboBox.SelectedIndex = 0;
 
@@ -146,7 +148,7 @@ internal sealed class CraftingView : IView
                 .IfNone(ItemLocation.CurrencyTab);
             var inventoryPosition = itemLocation switch
             {
-                ItemLocation.Inventory => 1,
+                ItemLocation.Inventory => 0,
                 _ => Option<int>.None,
             };
 

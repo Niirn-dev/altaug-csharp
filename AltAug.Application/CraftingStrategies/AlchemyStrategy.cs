@@ -1,12 +1,15 @@
 ﻿using AltAug.Domain.Interfaces;
 using AltAug.Domain.Models;
 using AltAug.Domain.Models.Enums;
+using AltAug.Domain.Models.Filters;
 using Microsoft.Extensions.Logging;
 
 namespace AltAug.Application.CraftingStrategies;
 
 internal sealed partial class AlchemyStrategy(IAutomationService automationService, ILogger<AlchemyStrategy> logger) : ICraftingStrategy
 {
+    private static readonly IFilter ImpliedFilter = new RarityFilter(ItemRarity.Rare);
+
     private readonly IAutomationService _automationService = automationService;
     private readonly ILogger<AlchemyStrategy> _logger = logger;
 
@@ -24,7 +27,8 @@ internal sealed partial class AlchemyStrategy(IAutomationService automationServi
             return 0;
         }
 
-        if (conditions.All(c => c.IsMatch(item)))
+        var combinedConditions = conditions.Append(ImpliedFilter);
+        if (combinedConditions.All(c => c.IsMatch(item)))
         {
             LogInfoAlreadyCrafted();
             return 0;
@@ -51,7 +55,7 @@ internal sealed partial class AlchemyStrategy(IAutomationService automationServi
             item = new ItemInfo(_automationService.GetItemDescription(locationParams));
             LogInfoCurrencyUsed(currencyOrbUsed, item);
 
-            if (conditions.All(c => c.IsMatch(item)))
+            if (combinedConditions.All(c => c.IsMatch(item)))
             {
                 LogInfoCraftingDone(nameof(AlchemyStrategy), alchemyUsedCount, scourUsedCount);
                 return alchemyUsedCount + scourUsedCount;
