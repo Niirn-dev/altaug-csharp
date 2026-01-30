@@ -1,10 +1,17 @@
-﻿using WindowsInput;
+﻿using AltAug.Domain.Models;
+using WindowsInput;
 
 namespace AltAug.Application.Wrappers;
 
-internal sealed class DelayedMouseSimulator(IInputSimulator inputSimulator, TimeSpan delay) : IMouseSimulator
+internal sealed class DelayedScaledMouseSimulator(IInputSimulator inputSimulator, TimeSpan delay, Vec2 screenResolution) : IMouseSimulator
 {
+    private const int AbsoluteScreenHeight = 65535;
+    private const int AbsoluteScreenWidth = 65535;
+
     private readonly TimeSpan _delay = delay;
+    private readonly Vec2 _screenResolutionScale = new(
+        X: AbsoluteScreenWidth / screenResolution.X,
+        Y: AbsoluteScreenHeight / screenResolution.Y);
     private readonly MouseSimulator _defaultSimulator = new(inputSimulator);
 
     public int MouseWheelClickSize { get => _defaultSimulator.MouseWheelClickSize; set => _defaultSimulator.MouseWheelClickSize = value; }
@@ -22,8 +29,11 @@ internal sealed class DelayedMouseSimulator(IInputSimulator inputSimulator, Time
 
     public IMouseSimulator MoveMouseTo(double absoluteX, double absoluteY)
     {
+        var scaledX = absoluteX * _screenResolutionScale.X;
+        var scaledY = absoluteY * _screenResolutionScale.Y;
+
         _defaultSimulator
-            .MoveMouseTo(absoluteX, absoluteY)
+            .MoveMouseTo(scaledX, scaledY)
             .Sleep(_delay);
 
         return this;
@@ -31,8 +41,11 @@ internal sealed class DelayedMouseSimulator(IInputSimulator inputSimulator, Time
 
     public IMouseSimulator MoveMouseToPositionOnVirtualDesktop(double absoluteX, double absoluteY)
     {
+        var scaledX = absoluteX * _screenResolutionScale.X;
+        var scaledY = absoluteY * _screenResolutionScale.Y;
+
         _defaultSimulator
-            .MoveMouseToPositionOnVirtualDesktop(absoluteX, absoluteY)
+            .MoveMouseToPositionOnVirtualDesktop(scaledX, scaledY)
             .Sleep(_delay);
 
         return this;

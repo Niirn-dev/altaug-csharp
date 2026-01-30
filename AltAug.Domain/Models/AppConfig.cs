@@ -21,7 +21,8 @@ public readonly record struct AppConfig(
         ),
         new(
             AutoGuiPause: AutomationConfig.DefaultAutoGuiPause,
-            CraftingStartDelay: AutomationConfig.DefaultCraftingStartDelay
+            CraftingStartDelay: AutomationConfig.DefaultCraftingStartDelay,
+            ScreenResolution: AutomationConfig.DefaultScreenResolution
         ),
         new(
             ItemLocationIndex: 0,
@@ -58,10 +59,11 @@ public readonly record struct Vec2(double X, double Y)
         Y: left.Y / right);
 }
 
-public readonly record struct AutomationConfig(double AutoGuiPause, double CraftingStartDelay)
+public readonly record struct AutomationConfig(double AutoGuiPause, double CraftingStartDelay, Vec2 ScreenResolution)
 {
     public const double DefaultAutoGuiPause = 0.05;
     public const double DefaultCraftingStartDelay = 1.5;
+    public static readonly Vec2 DefaultScreenResolution = new(X: 1920, Y: 1080);
 }
 
 public readonly record struct CraftingConfig(

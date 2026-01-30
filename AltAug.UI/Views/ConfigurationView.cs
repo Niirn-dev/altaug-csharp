@@ -8,9 +8,13 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using FluentAvalonia.Core;
 using LanguageExt;
 using Microsoft.Extensions.Logging;
-using MoreLinq;
+
+using static LanguageExt.Prelude;
+using static MoreLinq.Extensions.BatchExtension;
+using static MoreLinq.Extensions.ForEachExtension;
 
 namespace AltAug.UI.Views;
 
@@ -19,9 +23,31 @@ internal sealed partial class ConfigurationView : IView
     private const string ViewTitle = "Configuration";
     private const string AutoGuiPauseHintText = "Set pause after each action (recommended higher than in-game ping)";
     private const string CraftingDelayHintText = "Delay before crafting starts to swap focus to PoE window";
+    private const string ScreenResolutionHintText = "Screen Resolution (not PoE resolution)";
     private const int ConfigurationButtonSingleRowHeight = 61;
     private const int ConfigurationButtonDoubleRowHeight = 126;
     private const int ConfigurationButtonWidth = 63;
+
+    private static readonly IReadOnlyDictionary<string, Vec2> ScreenResolutionLookup = new Dictionary<string, Vec2>()
+    {
+        [ "800x600" ] = new Vec2(800, 600),
+        [ "1024x768" ] = new Vec2(1024, 768),
+        [ "1280x720" ] = new Vec2(1280, 720),
+        [ "1280x1024" ] = new Vec2(1280, 1024),
+        [ "1366x768" ] = new Vec2(1366, 768),
+        [ "1600x900" ] = new Vec2(1600, 900),
+        [ "1920x1080" ] = new Vec2(1920, 1080),
+        [ "2560x1080" ] = new Vec2(2560, 1080),
+        [ "2560x1440" ] = new Vec2(2560, 1440),
+        [ "3440x1440" ] = new Vec2(3440, 1440),
+        [ "3840x1600" ] = new Vec2(3840, 1600),
+        [ "3840x2160" ] = new Vec2(3840, 2160),
+        [ "5120x2160" ] = new Vec2(5120, 2160),
+        [ "5120x2880" ] = new Vec2(5120, 2880),
+        [ "6016x3384" ] = new Vec2(6016, 3384),
+        [ "7680x4320" ] = new Vec2(7680, 4320),
+    };
+    private static readonly int DefaultScreenResolutionComboBoxIndex = ScreenResolutionLookup.IndexOf("1920x1080");
 
     private readonly IStateManager<AppConfig> _appManager;
     private readonly IAutomationService _automationService;
@@ -33,8 +59,10 @@ internal sealed partial class ConfigurationView : IView
     private readonly Grid _automationConfigGrid;
     private readonly TextBlock _autoGuiPauseHintTextBlock;
     private readonly TextBlock _craftingDelayHintTextBlock;
+    private readonly TextBlock _screenResolutionHintTextBlock;
     private readonly NumericUpDown _autoGuiPauseUpDown;
     private readonly NumericUpDown _craftingDelayUpDown;
+    private readonly ComboBox _screenResolutionComboBox;
 
     public ConfigurationView(IStateManager<AppConfig> stateManager, IAutomationService automationService, ILogger<ConfigurationView> logger)
     {
@@ -85,24 +113,11 @@ internal sealed partial class ConfigurationView : IView
             ),
             MakeMapConfigurationBtn(),
         ];
-        doubledButtons.Batch(2).Select(buttons =>
-            {
-                var sp = new StackPanel
-                {
-                    Orientation = Orientation.Vertical,
-                    Margin = new Thickness(0),
-                };
-                buttons.ForEach(sp.Children.Add);
-
-                return sp;
-            })
-            .ForEach(configButtonsStack.Children.Add);
-        _mainPanel.Children.Add(configButtonsStack);
 
         _automationConfigGrid = new()
         {
             ColumnDefinitions = ColumnDefinitions.Parse("Auto, *"),
-            RowDefinitions = RowDefinitions.Parse("Auto, Auto"),
+            RowDefinitions = RowDefinitions.Parse("Auto, Auto, Auto"),
         };
 
         _autoGuiPauseHintTextBlock = ControlsLibrary.MakeSingleLineTextBlock(text: AutoGuiPauseHintText);
@@ -114,7 +129,8 @@ internal sealed partial class ConfigurationView : IView
             Minimum = 0.025m,
             Maximum = 1.0m,
             Width = 120,
-            Margin = new Thickness(10, 5),
+            Margin = new Thickness(uniformLength: 4),
+            HorizontalAlignment = HorizontalAlignment.Left,
         };
         _autoGuiPauseUpDown.ValueChanged += (src, args) => _appManager.Update(
             cfg => cfg with
@@ -134,7 +150,8 @@ internal sealed partial class ConfigurationView : IView
             Minimum = 0.5m,
             Maximum = 2.5m,
             Width = 120,
-            Margin = new Thickness(10, 5),
+            Margin = new Thickness(uniformLength: 4),
+            HorizontalAlignment = HorizontalAlignment.Left,
         };
         _craftingDelayUpDown.ValueChanged += (_, args) => _appManager.Update(
             cfg => cfg with
@@ -145,16 +162,53 @@ internal sealed partial class ConfigurationView : IView
                 }
             });
 
+        _screenResolutionHintTextBlock = ControlsLibrary.MakeSingleLineTextBlock(text: ScreenResolutionHintText);
+
+        _screenResolutionComboBox = ControlsLibrary.MakeAutoWidthComboBox();
+        ScreenResolutionLookup.Keys.ForEach(k => _screenResolutionComboBox.Items.Add(k));
+
+        _screenResolutionComboBox.SelectedIndex = ScreenResolutionLookup.Values
+            .Index()
+            .Find(p => p.Item == _appManager.State.AutomationConfig.ScreenResolution)
+            .Map(s => s.Index)
+            .IfNone(DefaultScreenResolutionComboBoxIndex);
+
+        _screenResolutionComboBox.SelectionChanged += (_, _) => _appManager.Update(
+            cfg => cfg with
+            {
+                AutomationConfig = cfg.AutomationConfig with
+                {
+                    ScreenResolution = ScreenResolutionLookup
+                        .TryGetValue(_screenResolutionComboBox.SelectedValueOrDefault(string.Empty))
+                        .IfNone(AutomationConfig.DefaultScreenResolution),
+                }
+            });
+
         // Define layout
+        doubledButtons.Batch(2).Select(buttons =>
+            {
+                var sp = new StackPanel
+                {
+                    Orientation = Orientation.Vertical,
+                    Margin = new Thickness(0),
+                };
+                buttons.ForEach(sp.Children.Add);
+
+                return sp;
+            })
+            .ForEach(configButtonsStack.Children.Add);
+
         _automationConfigGrid.AddControl(_autoGuiPauseUpDown, row: 0, column: 0)
             .AddControl(_autoGuiPauseHintTextBlock, row: 0, column: 1)
             .AddControl(_craftingDelayUpDown, row: 1, column: 0)
-            .AddControl(_craftingDelayHintTextBlock, row: 1, column: 1);
+            .AddControl(_craftingDelayHintTextBlock, row: 1, column: 1)
+            .AddControl(_screenResolutionComboBox, row: 2, column: 0)
+            .AddControl(_screenResolutionHintTextBlock, row: 2, column: 1);
 
+        _mainPanel.Children.Add(configButtonsStack);
         _mainPanel.Children.Add(_automationConfigGrid);
 
         var header = ControlsLibrary.MakeTitleTextBlock(text: ViewTitle);
-        header.Margin = new Thickness(uniformLength: 0);
         _root = new()
         {
             Header = header,

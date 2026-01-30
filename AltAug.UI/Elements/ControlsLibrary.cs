@@ -89,6 +89,13 @@ internal static class ControlsLibrary
         Margin = new Thickness(uniformLength: 4),
     };
 
+    public static ComboBox MakeAutoWidthComboBox() => new()
+    {
+        Height = 30,
+        HorizontalAlignment = HorizontalAlignment.Stretch,
+        Margin = new Thickness(uniformLength: 4),
+    };
+
     public static NumericUpDown MakeIntUpDown(int value) => new()
     {
         Value = value,

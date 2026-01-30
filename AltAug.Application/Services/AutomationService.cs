@@ -10,9 +10,9 @@ using WindowsInput;
 
 namespace AltAug.Application.Services;
 
-internal sealed class AutomationService(IStateManager<AppConfig> stateManager) : IAutomationService
+internal sealed class AutomationService(IStateManager<AppConfig> appManager) : IAutomationService
 {
-    private readonly IStateManager<AppConfig> _stateManager = stateManager;
+    private readonly IStateManager<AppConfig> _appManager = appManager;
 
     public Option<Vec2> GetMousePosition() => WindowsNativeHelper.GetCursorPosition();
 
@@ -45,7 +45,7 @@ internal sealed class AutomationService(IStateManager<AppConfig> stateManager) :
     {
         GetDelayedInputSimulator()
             .Mouse
-            .HoverItem(_stateManager.State, locationParams)
+            .HoverItem(_appManager.State, locationParams)
             .Keyboard
             .ModifiedKeyStroke([VirtualKeyCode.CONTROL, VirtualKeyCode.LMENU], VirtualKeyCode.VK_C);
 
@@ -54,10 +54,12 @@ internal sealed class AutomationService(IStateManager<AppConfig> stateManager) :
 
     public void UseCurrency(CurrencyOrb orb, ItemLocationParams locationParams) => GetDelayedInputSimulator()
         .Mouse
-        .HoverCurrency(_stateManager.State, orb)
+        .HoverCurrency(_appManager.State, orb)
         .RightButtonClick()
-        .HoverItem(_stateManager.State, locationParams)
+        .HoverItem(_appManager.State, locationParams)
         .LeftButtonClick();
 
-    private DelayedInputSimulator GetDelayedInputSimulator() => new(TimeSpan.FromSeconds(_stateManager.State.AutomationConfig.AutoGuiPause));
+    private DelayedScaledInputSimulator GetDelayedInputSimulator() => new(
+        delay: TimeSpan.FromSeconds(_appManager.State.AutomationConfig.AutoGuiPause),
+        screenResolution: _appManager.State.AutomationConfig.ScreenResolution);
 }
