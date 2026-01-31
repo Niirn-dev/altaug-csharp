@@ -1,3 +1,5 @@
+[![Release AltAug](https://github.com/Niirn-dev/altaug-csharp/actions/workflows/publish.yml/badge.svg?branch=master)](https://github.com/Niirn-dev/altaug-csharp/actions/workflows/publish.yml)
+
 # altaug - C# Edition
 A C# version of the [AltAug app](https://github.com/ybg94/altaug)
 

@@ -58,6 +58,7 @@ jobs:
 
     - name: Create GitHub release
       uses: softprops/action-gh-release@v2
+      if: github.ref_type == 'tag'
       with:
         files: ${{ env.Publish_Path }}\**
       env:
