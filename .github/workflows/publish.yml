@@ -2,8 +2,6 @@ name: Release AltAug
 
 on:
   push:
-    branches: 
-      - "master"
     tags:
       - "v*.*.*"
 
@@ -55,7 +53,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
       with:
-        files: ./AltAug-csharp/**
+        files: ${{ github.workspace }}/AltAug-csharp/**
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
