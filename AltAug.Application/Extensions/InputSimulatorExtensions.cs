@@ -45,8 +45,8 @@ internal static class InputSimulatorExtensions
         static Vec2 CalculateInventoryPosition(AppConfig appConfig, int inventoryPosition)
         {
             var coordinates = appConfig.CoordinatesConfig;
-            var mapPosition = (coordinates.MapTopLeft + coordinates.MapBottomRight) / 2;
-            var step = coordinates.MapBottomRight - coordinates.MapTopLeft;
+            var mapPosition = (coordinates.InventorySlotTopLeft + coordinates.InventorySlotBottomRight) / 2;
+            var step = coordinates.InventorySlotBottomRight - coordinates.InventorySlotTopLeft;
 
             var row = inventoryPosition % InventoryRowCount;
             var col = inventoryPosition / InventoryRowCount;

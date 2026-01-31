@@ -11,8 +11,8 @@ public readonly record struct AppConfig(
     public static AppConfig DefaultInstance { get; } = new(
         new(
             Item: new(0, 0),
-            MapTopLeft: new(0, 0),
-            MapBottomRight: new(0, 0),
+            InventorySlotTopLeft: new(0, 0),
+            InventorySlotBottomRight: new(0, 0),
             Alteration: new(0, 0),
             Augmentation: new(0, 0),
             Alchemy: new(0, 0),
@@ -36,8 +36,8 @@ public readonly record struct AppConfig(
 
 public readonly record struct CoordinatesConfig(
     Vec2 Item,
-    Vec2 MapTopLeft,
-    Vec2 MapBottomRight,
+    Vec2 InventorySlotTopLeft,
+    Vec2 InventorySlotBottomRight,
     Vec2 Alteration,
     Vec2 Augmentation,
     Vec2 Alchemy,

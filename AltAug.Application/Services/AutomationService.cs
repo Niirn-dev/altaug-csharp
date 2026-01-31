@@ -16,7 +16,7 @@ internal sealed class AutomationService(IStateManager<AppConfig> appManager) : I
 
     public Option<Vec2> GetMousePosition() => WindowsNativeHelper.GetCursorPosition();
 
-    public Option<Vec2> RecordMousePosition(int pollRate = 20, int failsafeTimeoutSeconds = 10)
+    public async Task<Option<Vec2>> RecordMousePositionAsync(int pollRate = 20, int failsafeTimeoutSeconds = 10)
     {
         InputSimulator inputSimulator = new();
 
@@ -32,11 +32,11 @@ internal sealed class AutomationService(IStateManager<AppConfig> appManager) : I
             if (inputSimulator.InputDeviceState.IsAnyHardwareKeyDown([VirtualKeyCode.VK_Q, VirtualKeyCode.ESCAPE]))
                 break;
 
-            Thread.Sleep(TimeSpan.FromSeconds(1.0 / pollRate));
+            await Task.Delay(TimeSpan.FromSeconds(1.0 / pollRate));
         }
 
         while (inputSimulator.InputDeviceState.IsAnyHardwareKeyDown([VirtualKeyCode.VK_E, VirtualKeyCode.VK_Q, VirtualKeyCode.ESCAPE]))
-            Thread.Sleep(TimeSpan.FromSeconds(1.0 / pollRate));
+            await Task.Delay(TimeSpan.FromSeconds(1.0 / pollRate));
 
         return point;
     }

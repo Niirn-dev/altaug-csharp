@@ -1,6 +1,7 @@
 ﻿using AltAug.Domain.Interfaces;
 using AltAug.Domain.Models;
 using AltAug.UI.Elements;
+using AltAug.UI.Elements.Dialogs;
 using AltAug.UI.Extensions;
 using AltAug.UI.Interfaces;
 using Avalonia;
@@ -85,7 +86,8 @@ internal sealed partial class ConfigurationView : IView
         configButtonsStack.Children.Add(
             MakeDoubleRowConfigBtn(
                 AssetLibrary.GetBowItemBitmap(),
-                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Item = point } }
+                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Item = point } },
+                hoverTarget: "Currency tab's item slot"
             )
         );
 
@@ -93,23 +95,28 @@ internal sealed partial class ConfigurationView : IView
         [
             MakeSingleRowConfigBtn(
                 AssetLibrary.GetAlterationOrbBitmap(),
-                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Alteration = point } }
+                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Alteration = point } },
+                hoverTarget: "Alteration orb"
             ),
             MakeSingleRowConfigBtn(
                 AssetLibrary.GetAlchemyOrbBitmap(),
-                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Alchemy = point } }
+                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Alchemy = point } },
+                hoverTarget: "Alchemy orb"
             ),
             MakeSingleRowConfigBtn(
                 AssetLibrary.GetAugmentationOrbBitmap(),
-                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Augmentation = point } }
+                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Augmentation = point } },
+                hoverTarget: "Augmentation orb"
             ),
             MakeSingleRowConfigBtn(
                 AssetLibrary.GetScouringOrbBitmap(),
-                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Scour = point } }
+                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Scour = point } },
+                hoverTarget: "Scouring orb"
             ),
             MakeSingleRowConfigBtn(
                 AssetLibrary.GetChaosOrbBitmap(),
-                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Chaos = point } }
+                (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Chaos = point } },
+                hoverTarget: "Chaos orb"
             ),
             MakeMapConfigurationBtn(),
         ];
@@ -235,22 +242,28 @@ internal sealed partial class ConfigurationView : IView
             Padding = new Thickness(0),
         };
 
-        btn.Click += (src, args) =>
+        btn.Click += async (src, args) =>
         {
-            _automationService.RecordMousePosition().Match(
+            var dialog = new MousePositionRecordingDialog(_automationService);
+            var cursorPosition = await dialog.ShowDialogAsync(hoverTarget: "top-left corner of the first inventory slot");
+            cursorPosition.Match(
                 point =>
                 {
                     LogInfoCursorPosition(point.X, point.Y);
-                    _appManager.Update(cfg => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { MapTopLeft = point } });
+                    _appManager.Update(cfg => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { InventorySlotTopLeft = point } });
                 },
                 () => LogInfoCursorPositionNotRecorded()
             );
 
-            _automationService.RecordMousePosition().Match(
+            if (cursorPosition.IsNone)
+                return;
+
+            cursorPosition = await dialog.ShowDialogAsync(hoverTarget: "bottom-right corner of the first inventory slot");
+            cursorPosition.Match(
                 point =>
                 {
                     LogInfoCursorPosition(point.X, point.Y);
-                    _appManager.Update(cfg => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { MapBottomRight = point } });
+                    _appManager.Update(cfg => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { InventorySlotBottomRight = point } });
                 },
                 () => LogInfoCursorPositionNotRecorded()
             );
@@ -259,19 +272,21 @@ internal sealed partial class ConfigurationView : IView
         return btn;
     }
 
-    private Button MakeDoubleRowConfigBtn(Bitmap imageSource, Func<AppConfig, Vec2, AppConfig> configUpdater) => MakeConfigurationButton(
+    private Button MakeDoubleRowConfigBtn(Bitmap imageSource, Func<AppConfig, Vec2, AppConfig> configUpdater, string hoverTarget) => MakeConfigurationButton(
         imageSource,
         height: ConfigurationButtonDoubleRowHeight,
         width: ConfigurationButtonWidth,
-        configUpdater);
+        configUpdater,
+        hoverTarget);
 
-    private Button MakeSingleRowConfigBtn(Bitmap imageSource, Func<AppConfig, Vec2, AppConfig> configUpdater) => MakeConfigurationButton(
+    private Button MakeSingleRowConfigBtn(Bitmap imageSource, Func<AppConfig, Vec2, AppConfig> configUpdater, string hoverTarget) => MakeConfigurationButton(
         imageSource,
         height: ConfigurationButtonSingleRowHeight,
         width: ConfigurationButtonWidth,
-        configUpdater);
+        configUpdater,
+        hoverTarget);
 
-    private Button MakeConfigurationButton(Bitmap imageSource, int height, int width, Func<AppConfig, Vec2, AppConfig> configUpdater)
+    private Button MakeConfigurationButton(Bitmap imageSource, int height, int width, Func<AppConfig, Vec2, AppConfig> configUpdater, string hoverTarget)
     {
         var btn = new Button
         {
@@ -286,9 +301,10 @@ internal sealed partial class ConfigurationView : IView
             Padding = new Thickness(0),
         };
 
-        btn.Click += (src, args) =>
+        btn.Click += async (src, args) =>
         {
-            var cursorPosition = _automationService.RecordMousePosition();
+            var dialog = new MousePositionRecordingDialog(_automationService);
+            var cursorPosition = await dialog.ShowDialogAsync(hoverTarget);
             cursorPosition.Match(
                 point =>
                 {
