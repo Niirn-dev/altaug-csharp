@@ -5,7 +5,6 @@ using AltAug.UI.Extensions;
 using AltAug.UI.Interfaces;
 using Avalonia.Controls;
 using Avalonia.Layout;
-using Avalonia.Media;
 using LanguageExt;
 
 namespace AltAug.UI.Elements;

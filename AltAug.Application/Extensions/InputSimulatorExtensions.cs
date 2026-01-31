@@ -42,11 +42,15 @@ internal static class InputSimulatorExtensions
 
     public static IMouseSimulator HoverInventoryItem(this IMouseSimulator that, AppConfig appConfig, Option<Vec2> itemDimensions, int inventoryPosition)
     {
-        static Vec2 CalculateInventoryPosition(AppConfig appConfig, int inventoryPosition)
+        static Vec2 CalculateInventoryPosition(AppConfig appConfig, Option<Vec2> itemDimensions, int inventoryPosition)
         {
+            var dimensions = itemDimensions.IfNone(() => new Vec2(1, 1));
+
             var coordinates = appConfig.CoordinatesConfig;
             var mapPosition = (coordinates.InventorySlotTopLeft + coordinates.InventorySlotBottomRight) / 2;
-            var step = coordinates.InventorySlotBottomRight - coordinates.InventorySlotTopLeft;
+            var step = (coordinates.InventorySlotBottomRight - coordinates.InventorySlotTopLeft) * dimensions;
+
+            int effectiveRowCount = InventoryRowCount / (int)dimensions.Y;
 
             var row = inventoryPosition % InventoryRowCount;
             var col = inventoryPosition / InventoryRowCount;
@@ -56,7 +60,7 @@ internal static class InputSimulatorExtensions
         }
 
         return that
-            .MoveMouseTo(CalculateInventoryPosition(appConfig, inventoryPosition));
+            .MoveMouseTo(CalculateInventoryPosition(appConfig, itemDimensions, inventoryPosition));
     }
 
     public static IMouseSimulator MoveMouseTo(this IMouseSimulator that, Vec2 point) => that

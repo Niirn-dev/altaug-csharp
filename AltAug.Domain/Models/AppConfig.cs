@@ -57,6 +57,10 @@ public readonly record struct Vec2(double X, double Y)
     public static Vec2 operator /(Vec2 left, double right) => new(
         X: left.X / right,
         Y: left.Y / right);
+
+    public static Vec2 operator *(Vec2 left, Vec2 right) => new(
+        X: left.X * right.X,
+        Y: left.Y * right.Y);
 }
 
 public readonly record struct AutomationConfig(double AutoGuiPause, double CraftingStartDelay, Vec2 ScreenResolution)
