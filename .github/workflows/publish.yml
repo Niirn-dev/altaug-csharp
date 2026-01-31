@@ -48,13 +48,13 @@ jobs:
       uses: actions/download-artifact@v7
       with:
         name: AltAug-csharp
-        path: ${{ github.workspace }}\publish
+        path: ./publish
 
     - name: Create GitHub release
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
       with:
-        files: ${{ github.workspace }}\publish\**
+        files: ./publish/**
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
