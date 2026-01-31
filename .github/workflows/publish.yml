@@ -13,6 +13,7 @@ jobs:
 
     env:
       Solution_Name: .\AltAug\AltAug.slnx
+      Publish_Path: .\AltAug\bin\publish
 
     steps:
     - name: Checkout
@@ -32,13 +33,13 @@ jobs:
       run: dotnet build ${{ env.Solution_Name }} -c Release --no-restore
 
     - name: Publish self-contained app
-      run: dotnet publish ${{ env.Solution_Name }} -c Release -r win10-x64 --self-contained true -o ${{ env.Solution_Name }}/bin/publish
+      run: dotnet publish ${{ env.Solution_Name }} -c Release -r win-x64 --self-contained true -o ${{ env.Publish_Path }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: AltAug-csharp
-        path: ${{ env.Solution_Name }}/bin/publish
+        path: ${{ env.Publish_Path }}
 
   release:
     needs: build
@@ -46,18 +47,19 @@ jobs:
 
     env:
       Solution_Name: .\AltAug\AltAug.slnx
+      Publish_Path: .\AltAug\bin\publish
 
     steps:
     - name: Download artifacts
       uses: actions/download-artifact@v4
       with:
         name: AltAug-csharp
-        path: ${{ env.Solution_Name }}/bin/publish
+        path: ${{ env.Publish_Path }}
 
     - name: Create GitHub release
       uses: softprops/action-gh-release@v2
       with:
-        files: ${{ env.Solution_Name }}/bin/publish/**
+        files: ${{ env.Publish_Path }}\**
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
