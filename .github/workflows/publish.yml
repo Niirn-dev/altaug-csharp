@@ -44,7 +44,7 @@ jobs:
       run: >-
         wix build ${{ env.WiX_Package }}
         -d PublishPath="${{ env.Publish_Path }}"
-        -src ${{ evn.WiX_Source_Files }}
+        -src ${{ env.WiX_Source_Files }}
         -loc ${{ env.WiX_Localization_Files }}
         -arch x64
         -o ${{ env.WiX_Output_Path }}
