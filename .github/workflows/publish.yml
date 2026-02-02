@@ -42,7 +42,7 @@ jobs:
 
     - name: Build MSI
       run: >-
-        wix build ${{ env.WiX_Package }}
+        dotnet wix build ${{ env.WiX_Package }}
         -d PublishPath="${{ env.Publish_Path }}"
         -src ${{ env.WiX_Source_Files }}
         -loc ${{ env.WiX_Localization_Files }}
