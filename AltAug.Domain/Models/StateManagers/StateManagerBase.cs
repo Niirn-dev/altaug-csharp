@@ -1,4 +1,5 @@
-﻿using AltAug.Domain.Interfaces;
+﻿using AltAug.Domain.Helpers;
+using AltAug.Domain.Interfaces;
 using AltAug.Domain.Models.Filters;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -15,7 +16,12 @@ public abstract class StateManagerBase<TState> : IStateManager<TState>
 
     protected StateManagerBase(string stateFilePath, TState defaultState)
     {
-        _stateFile = new(stateFilePath);
+        _stateFile = new(Path.Combine(
+            [
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                Constants.ApplicationName,
+                stateFilePath
+            ]));
 
         _serializer = new SerializerBuilder()
             .WithNamingConvention(CamelCaseNamingConvention.Instance)

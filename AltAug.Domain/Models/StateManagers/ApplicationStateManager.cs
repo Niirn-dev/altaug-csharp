@@ -2,7 +2,7 @@
 
 public sealed class ApplicationStateManager : StateManagerBase<AppConfig>
 {
-    private const string ConfigFilePath = "etc/config.yaml";
+    private const string ConfigFilePath = "config.yaml";
 
     private static readonly Lazy<ApplicationStateManager> _instance = new(() => new ApplicationStateManager());
 

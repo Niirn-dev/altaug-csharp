@@ -123,7 +123,7 @@ internal sealed class RegexLibraryDialog
         {
             Title = DialogTitle,
             Content = _root,
-            IsPrimaryButtonEnabled = false,
+            IsPrimaryButtonEnabled = RegexString.Length != 0,
             PrimaryButtonText = "Select",
             SecondaryButtonText = "Save",
             CloseButtonText = "Cancel",
