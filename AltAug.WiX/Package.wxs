@@ -1,0 +1,19 @@
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Id="Niirn.AltAug.NET"
+					 Name="AltAug.NET"
+					 Manufacturer="Niirn"
+					 Version="1.0.0.0"
+					 InstallerVersion="500"
+					 Compressed="yes"
+					 UpgradeCode="9488B474-6412-4E0D-BFC8-D9DBC34F67C0">
+    <MajorUpgrade DowngradeErrorMessage="!(loc.DowngradeError)" />
+
+    <MediaTemplate EmbedCab="yes"/>
+
+    <Launch Condition="MsiNTProductType = 1" Message="!(loc.UnsupportedOSError)"/>
+    
+    <Feature Id="Main" Title="AltAug C#">
+      <ComponentGroupRef Id="AppComponents" />
+    </Feature>
+  </Package>
+</Wix>

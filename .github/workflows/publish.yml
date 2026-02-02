@@ -1,4 +1,4 @@
-name: Release AltAug
+name: Release AltAug.NET
 
 on:
   push:
@@ -12,6 +12,10 @@ jobs:
     env:
       Solution_Name: ./AltAug/AltAug.slnx
       Publish_Path: ./AltAug/bin/Release/net10.0-windows/win-x64/publish
+      WiX_Package: ./AltAug.WiX/Package.wxs
+      WiX_Source_Files: ./AltAug.WiX/AppComponents.wxs ./AltAug.WiX/Folders.wxs
+      WiX_Localization_Files: ./AltAug.WiX/Package.en-us.wxl
+      WiX_Output_Path: ./Installer/AltAug.msi
 
     steps:
     - name: Checkout
@@ -24,6 +28,9 @@ jobs:
       with:
         dotnet-version: 10.0.x
 
+    - name: Install WiX
+      run: dotnet tool install wix --version 6.0.0
+
     - name: Restore
       run: dotnet restore ${{ env.Solution_Name }}
 
@@ -31,13 +38,22 @@ jobs:
       run: dotnet build ${{ env.Solution_Name }} -c Release --no-restore
 
     - name: Publish self-contained app
-      run: dotnet publish ${{ env.Solution_Name }} -c Release -r win-x64 --self-contained true
+      run: dotnet publish ${{ env.Solution_Name }} -c Release -r win-x64
+
+    - name: Build MSI
+      run: >-
+        wix build ${{ env.WiX_Package }}
+        -d PublishPath="${{ env.Publish_Path }}"
+        -src ${{ evn.WiX_Source_Files }}
+        -loc ${{ env.WiX_Localization_Files }}
+        -arch x64
+        -o ${{ env.WiX_Output_Path }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v6
       with:
-        name: AltAug-csharp
-        path: ${{ env.Publish_Path }}
+        name: AltAug.NET
+        path: ${{ env.WiX_Output_Path }}
 
   release:
     needs: build
@@ -47,14 +63,14 @@ jobs:
     - name: Download artifacts
       uses: actions/download-artifact@v7
       with:
-        name: AltAug-csharp
+        name: AltAug.NET
         path: ./publish
 
     - name: Create GitHub release
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
       with:
-        files: ./publish/**
+        files: ./publish/*.msi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

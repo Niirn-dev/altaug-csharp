@@ -1,6 +1,16 @@
 <Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
   <Project Path="../AltAug.Application/AltAug.Application.csproj" Id="0a30d1d0-b041-4070-a86b-304731bd649c" />
   <Project Path="../AltAug.Domain/AltAug.Domain.csproj" Id="0b0a537d-787e-446c-9030-f375b041ef6f" />
   <Project Path="../AltAug.UI/AltAug.UI.csproj" />
+  <Project Path="../AltAug.WiX/AltAug.WiX.wixproj" Type="b7dd6f7e-def8-4e67-b5b7-07ef123db6f0" Id="69e1fa12-3ae9-416d-8941-652826e5a341">
+    <Platform Solution="*|Any CPU" Project="x64" />
+    <Build Solution="*|Any CPU" Project="false" />
+  </Project>
   <Project Path="AltAug.csproj" />
 </Solution>

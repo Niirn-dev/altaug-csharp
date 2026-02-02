@@ -1,9 +1,9 @@
-[![Release AltAug](https://github.com/Niirn-dev/altaug-csharp/actions/workflows/publish.yml/badge.svg?branch=master)](https://github.com/Niirn-dev/altaug-csharp/actions/workflows/publish.yml)
+[![Release AltAug.NET](https://github.com/Niirn-dev/altaug-csharp/actions/workflows/publish.yml/badge.svg?branch=master)](https://github.com/Niirn-dev/altaug-csharp/actions/workflows/publish.yml)
 
-# altaug - C# Edition
+# AltAug.NET
 A C# version of the [AltAug app](https://github.com/ybg94/altaug)
 
-# altaug
+# AltAug
 Application to be used for Path of Exile 1. 
 
 The purpose of this application is to provide a way for users to be able to more easily currency spam items.
