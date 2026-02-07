@@ -40,7 +40,7 @@ jobs:
       run: dotnet build ${{ env.Project_Name }} -c Release --no-restore
 
     - name: Publish
-      run: dotnet publish ${{ env.Project_Name }} -c Release -r win-x64 -o {{ env.Publish_Path }}
+      run: dotnet publish ${{ env.Project_Name }} -c Release -r win-x64 -o ${{ env.Publish_Path }}
 
     - name: Install WiX Extensions
       run: dotnet wix extension add WixToolset.UI.wixext/6.0.2
