@@ -11,11 +11,13 @@ jobs:
 
     env:
       Solution_Name: ./AltAug/AltAug.slnx
-      Publish_Path: ./AltAug/bin/Release/net10.0-windows/win-x64/publish
+      Project_Name: ./AltAug/AltAug.csproj
+      Publish_Path: ./publish
+      Icon_Path: ./AltAug/altaug.ico
       WiX_Package: ./AltAug.WiX/Package.wxs
-      WiX_Source_Files: ./AltAug.WiX/AppComponents.wxs ./AltAug.WiX/Folders.wxs
+      WiX_Source_Files: ./AltAug.WiX/AppComponents.wxs ./AltAug.WiX/Folders.wxs ./AltAug.WiX/ShortcutDlg.wxs
       WiX_Localization_Files: ./AltAug.WiX/Package.en-us.wxl
-      WiX_Output_Path: ./Installer/AltAug.msi
+      WiX_Output_Path: ./installer/AltAug.msi
 
     steps:
     - name: Checkout
@@ -35,15 +37,18 @@ jobs:
       run: dotnet restore ${{ env.Solution_Name }}
 
     - name: Build
-      run: dotnet build ${{ env.Solution_Name }} -c Release --no-restore
+      run: dotnet build ${{ env.Project_Name }} -c Release --no-restore
 
-    - name: Publish self-contained app
-      run: dotnet publish ${{ env.Solution_Name }} -c Release -r win-x64
+    - name: Publish
+      run: dotnet publish ${{ env.Project_Name }} -c Release -r win-x64 -o {{ env.Publish_Path }}
+
+    - name: Install WiX Extensions
+      run: dotnet wix extension add WixToolset.UI.wixext/6.0.2
 
     - name: Build MSI
       run: >-
-        dotnet wix build ${{ env.WiX_Package }}
-        -d PublishPath="${{ env.Publish_Path }}"
+        dotnet wix build -ext WixToolset.UI.wixext ${{ env.WiX_Package }}
+        -d PublishPath="${{ env.Publish_Path }}" -d IconPath="${{ env.Icon_Path }}"
         -src ${{ env.WiX_Source_Files }}
         -loc ${{ env.WiX_Localization_Files }}
         -arch x64

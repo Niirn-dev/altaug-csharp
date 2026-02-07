@@ -291,3 +291,4 @@ __pycache__/
 # WiX output files
 *.msi
 *.wixpdb
+.wix/

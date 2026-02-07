@@ -1,8 +1,9 @@
-﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
   <Package Id="Niirn.AltAug.NET"
 					 Name="AltAug.NET"
 					 Manufacturer="Niirn"
-					 Version="1.0.0.0"
+					 Version="1.0.1.0"
 					 InstallerVersion="500"
 					 Compressed="yes"
 					 UpgradeCode="9488B474-6412-4E0D-BFC8-D9DBC34F67C0">
@@ -11,9 +12,21 @@
     <MediaTemplate EmbedCab="yes"/>
 
     <Launch Condition="MsiNTProductType = 1" Message="!(loc.UnsupportedOSError)"/>
+
+    <Icon Id="AltAugIcon" SourceFile="$(var.IconPath)" />
+    <Property Id="ARPPRODUCTICON" Value="AltAugIcon" />
     
-    <Feature Id="Main" Title="AltAug C#">
+    <Feature Id="Main" Title="!(bind.Property.ProductName)">
       <ComponentGroupRef Id="AppComponents" />
+      <ComponentRef Id="ApplicationShortcut" />
     </Feature>
+
+    <UI>
+      <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="5" />
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="5" />
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="ShortcutDlg" Order="5" />
+    </UI>
   </Package>
 </Wix>

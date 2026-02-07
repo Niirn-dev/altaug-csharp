@@ -2,6 +2,9 @@
 <WixLocalization Culture="en-us" xmlns="http://wixtoolset.org/schemas/v4/wxl">
   
   <String Id="DowngradeError" Value="A newer version of !(bind.Property.ProductName) is already installed." />
-  <String Id="UnsupportedOSError" Value="Unsupported OS type."/>
+  <String Id="UnsupportedOSError" Value="Unsupported OS type." />
+  
+  <String Id="AddShortcutLabel" Value="Do you want to create a Start Menu shortcut?" />
+  <String Id="AddShortcutCheckbox" Value="Create Start Menu shortcut" />
   
 </WixLocalization>

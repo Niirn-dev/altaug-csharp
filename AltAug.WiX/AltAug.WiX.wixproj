@@ -1,5 +1,11 @@
 ﻿<Project Sdk="WixToolset.Sdk/6.0.2">
   <ItemGroup>
+    <EmbeddedResource Include="Resources\altaug.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="WixToolset.UI.wixext" Version="6.0.2" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\AltAug\AltAug.csproj" />
   </ItemGroup>
 </Project>
