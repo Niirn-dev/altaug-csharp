@@ -1,4 +1,4 @@
-[![Release AltAug.NET](https://github.com/Niirn-dev/altaug-csharp/actions/workflows/publish.yml/badge.svg?branch=master)](https://github.com/Niirn-dev/altaug-csharp/actions/workflows/publish.yml)
+[![Release AltAug.NET](https://github.com/Niirn-dev/altaug-csharp/actions/workflows/publish.yml/badge.svg)](https://github.com/Niirn-dev/altaug-csharp/actions/workflows/publish.yml)
 
 # AltAug.NET
 A C# version of the [AltAug app](https://github.com/ybg94/altaug)
