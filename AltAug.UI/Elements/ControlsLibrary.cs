@@ -93,6 +93,13 @@ internal static class ControlsLibrary
         return tb;
     }
 
+    public static ListBox MakeLogListBox() => new()
+    {
+        MinHeight = 150,
+        MaxHeight = 250,
+        HorizontalAlignment = HorizontalAlignment.Stretch,
+    };
+
     public static ComboBox MakeComboBox() => new()
     {
         Height = 30,

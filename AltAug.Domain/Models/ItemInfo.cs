@@ -71,6 +71,8 @@ public sealed class ItemInfo
         sb.AppendLine("Item affixes:");
         Affixes.ForEach(affix => sb.AppendLine($"- {affix}"));
 
+        sb.Length--;
+
         return sb.ToString();
     }
 

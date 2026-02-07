@@ -30,7 +30,7 @@ To interrupt the crafting process you can move the cursor to the top-left corner
 
     private readonly Grid _root;
     private readonly TextBlock _instructionsTextBlock;
-    private readonly TextBox _logTextBox;
+    private readonly ListBox _logListBox;
 
     private CancellationTokenSource _cts = null!;
     private ContentDialog _dialog = new();
@@ -50,14 +50,14 @@ To interrupt the crafting process you can move the cursor to the top-left corner
 
         _instructionsTextBlock = ControlsLibrary.MakeVariableHeightTextBlock(text: InstructionsText);
 
-        _logTextBox = ControlsLibrary.MakeLogTextBox();
-        loggerFactory.AddProvider(new TextBoxLoggerProvider(_logTextBox, useMinimalFormat: true));
+        _logListBox = ControlsLibrary.MakeLogListBox();
+        loggerFactory.AddProvider(new ListBoxLoggerProvider(_logListBox));
 
         _logger = loggerFactory.CreateLogger<CraftingProgressDialog>();
 
         // Define layout
         _root.AddControl(_instructionsTextBlock, row: 0, column: 0)
-            .AddControl(_logTextBox, row: 1, column: 0);
+            .AddControl(_logListBox, row: 1, column: 0);
     }
 
     public async Task<ContentDialogResult> OpenDialogAsync(
@@ -67,7 +67,7 @@ To interrupt the crafting process you can move the cursor to the top-left corner
         int itemsCount,
         int maxAttempts)
     {
-        _logTextBox.Text = string.Empty;
+        _logListBox.Items.Clear();
         _dialog.Content = null;
 
         _dialog = new()
@@ -84,7 +84,7 @@ To interrupt the crafting process you can move the cursor to the top-left corner
         _dialog.PrimaryButtonClick += async (_, args) =>
         {
             args.Cancel = true;
-            _logTextBox.Text = string.Empty;
+            _logListBox.Items.Clear();
             await StartCraftingWithKillSwitchAsync().ConfigureAwait(false);
         };
 
