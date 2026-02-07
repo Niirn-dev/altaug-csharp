@@ -4,9 +4,9 @@ using AltAug.UI.Interfaces;
 using Avalonia.Controls;
 using Avalonia.Layout;
 
-namespace AltAug.UI.Elements;
+namespace AltAug.UI.Elements.FilterControls;
 
-internal sealed class OpenPrefixFilterControl : IFilterControl
+internal sealed class OpenPrefixFilterControl : IFilterControl<OpenPrefixFilter>
 {
     private const string ControlTitle = "Open Prefix Filter";
 
@@ -16,7 +16,6 @@ internal sealed class OpenPrefixFilterControl : IFilterControl
     private readonly Button _closeButton;
 
     public bool IsRemoved { get; private set; } = false;
-    public Type FilterType { get; } = typeof(OpenPrefixFilter);
     public IFilterParams Parameters { get; } = new OpenPrefixFilterParameters();
 
     public OpenPrefixFilterControl()

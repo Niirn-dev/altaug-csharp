@@ -4,9 +4,9 @@ using AltAug.UI.Interfaces;
 using Avalonia.Controls;
 using Avalonia.Layout;
 
-namespace AltAug.UI.Elements;
+namespace AltAug.UI.Elements.FilterControls;
 
-internal sealed class OpenSuffixFilterControl : IFilterControl
+internal sealed class OpenSuffixFilterControl : IFilterControl<OpenSuffixFilter>
 {
     private const string ControlTitle = "Open Suffix Filter";
 
@@ -16,7 +16,6 @@ internal sealed class OpenSuffixFilterControl : IFilterControl
     private readonly Button _closeButton;
 
     public bool IsRemoved { get; private set; } = false;
-    public Type FilterType { get; } = typeof(OpenSuffixFilter);
     public IFilterParams Parameters { get; } = new OpenSuffixFilterParameters();
 
     public OpenSuffixFilterControl()

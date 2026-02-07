@@ -1,6 +1,7 @@
 ﻿using AltAug.Domain.Interfaces;
 using AltAug.Domain.Models;
 using AltAug.Domain.Models.Filters;
+using AltAug.UI.Elements.FilterControls;
 using AltAug.UI.Interfaces;
 
 namespace AltAug.UI.Elements;

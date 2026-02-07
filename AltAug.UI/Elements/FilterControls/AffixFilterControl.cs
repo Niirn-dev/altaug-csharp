@@ -7,9 +7,9 @@ using Avalonia.Controls;
 using Avalonia.Layout;
 using LanguageExt;
 
-namespace AltAug.UI.Elements;
+namespace AltAug.UI.Elements.FilterControls;
 
-internal sealed class AffixFilterControl : IFilterControl
+internal sealed class AffixFilterControl : IFilterControl<AffixFilter>
 {
     private const string ControlTitle = "Affix Filter";
     private const string InputHeader_Name = "Affix Name";
@@ -31,7 +31,6 @@ internal sealed class AffixFilterControl : IFilterControl
     private readonly NumericUpDown _inputUpDown_Tier;
 
     public bool IsRemoved { get; private set; } = false;
-    public Type FilterType { get; } = typeof(AffixFilter);
     public IFilterParams Parameters
     {
         get => new AffixFilterParameters(

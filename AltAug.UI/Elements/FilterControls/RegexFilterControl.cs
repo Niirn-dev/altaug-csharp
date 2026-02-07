@@ -4,14 +4,13 @@ using AltAug.Domain.Models.Filters;
 using AltAug.UI.Elements.Dialogs;
 using AltAug.UI.Extensions;
 using AltAug.UI.Interfaces;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using FluentAvalonia.UI.Controls;
 
-namespace AltAug.UI.Elements;
+namespace AltAug.UI.Elements.FilterControls;
 
-internal sealed class RegexFilterControl : IFilterControl
+internal sealed class RegexFilterControl : IFilterControl<RegexFilter>
 {
     private const string ControlTitle = "Regex Filter";
 
@@ -27,7 +26,6 @@ internal sealed class RegexFilterControl : IFilterControl
     private readonly Button _closeButton;
 
     public bool IsRemoved { get; private set; } = false;
-    public Type FilterType { get; } = typeof(RegexFilter);
     public IFilterParams Parameters { get => new RegexFilterParameters(_regexTextBox.Text ?? string.Empty); }
 
     public RegexFilterControl(IStateManager<RegexLibraryStore> regexLibraryManager)

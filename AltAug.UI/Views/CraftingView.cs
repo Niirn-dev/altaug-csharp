@@ -1,12 +1,12 @@
-﻿using AltAug.Domain.Extensions;
-using AltAug.Domain.Helpers;
+﻿using System.Reflection;
+using AltAug.Domain.Extensions;
 using AltAug.Domain.Interfaces;
 using AltAug.Domain.Models;
 using AltAug.Domain.Models.Enums;
-using AltAug.Domain.Models.Filters;
 using AltAug.UI.Elements;
 using AltAug.UI.Elements.Dialogs;
 using AltAug.UI.Extensions;
+using AltAug.UI.Helpers;
 using AltAug.UI.Interfaces;
 using Avalonia;
 using Avalonia.Controls;
@@ -97,7 +97,7 @@ internal sealed class CraftingView : IView
             Margin = new Thickness(uniformLength: 0),
         };
         _appManager.State.CraftingConfig.Filters
-            .ForEach(f => SerializationHelper.SerializedNameToType.TryGetValue(f.FilterTypeName)
+            .ForEach(f => SerializationHelper.FilterSerializedNameToType.TryGetValue(f.FilterTypeName)
                 .IfSome(filterType =>
                 {
                     var filterControl = _filterControlFactory.Create(filterType);
@@ -108,12 +108,13 @@ internal sealed class CraftingView : IView
                 }));
 
         _filterComboBox = ControlsLibrary.MakeComboBox();
-        _filterTypes = [.. AppDomain.CurrentDomain.GetAssemblies()
-            .SelectMany(t => t.GetTypes())
-            .Where(t => typeof(IFilter).IsAssignableFrom(t)
-                && t.IsClass
-                && !t.IsAbstract)
-            .Except([typeof(RarityFilter)])]; // Ugly hack, internal filter. TODO: Not sure if want to make a control for it or do it properly later
+        _filterTypes = [.. Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .Where(t => !t.IsAbstract && !t.IsInterface)
+            .SelectMany(t => t.GetInterfaces()
+                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IFilterControl<>))
+                .Select(i => i.GetGenericArguments()[0])
+            )];
         _filterTypes.ForEach(t => _filterComboBox.Items.Add(t.Name));
         _filterComboBox.SelectedIndex = 0;
 
@@ -164,7 +165,7 @@ internal sealed class CraftingView : IView
         {
             var selectedFilterState = _selectedFilterControls
                 .Where(f => !f.IsRemoved)
-                .Select(f => (SerializationHelper.TypeNameToSerializedName[f.FilterType.Name], f.Parameters))
+                .Select(f => (f.GetSerializedName(), f.Parameters))
                 .ToArray();
 
             _appManager.Update(cfg => cfg with

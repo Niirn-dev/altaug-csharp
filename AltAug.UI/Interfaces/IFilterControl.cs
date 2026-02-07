@@ -3,10 +3,14 @@ using Avalonia.Controls;
 
 namespace AltAug.UI.Interfaces;
 
+internal interface IFilterControl<TFilter> : IFilterControl
+    where TFilter : IFilter
+{
+}
+
 internal interface IFilterControl
 {
     bool IsRemoved { get; }
-    Type FilterType { get; }
     IFilterParams Parameters { get; }
 
     void Accept(IFilterParams @params);
