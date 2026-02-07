@@ -27,7 +27,17 @@ var stateManager = host.Services.GetRequiredService<IStateManager<AppConfig>>();
 
 Console.WriteLine("Starting GUI...");
 
-UIServices.Build(args, host.Services);
+try
+{
+    UIServices.Build(args, host.Services);
 
-Console.WriteLine("GUI shut down. Saving application state...");
-stateManager.Save();
+    Console.WriteLine("GUI shut down. Saving application state...");
+}
+catch
+{
+    Console.WriteLine("Application ran into an unhandled issue, shutting down...");
+}
+finally
+{
+    stateManager.Save();
+}

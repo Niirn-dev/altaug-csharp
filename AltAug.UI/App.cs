@@ -33,9 +33,10 @@ internal sealed class App(IServiceProvider serviceProvider) : Application
            desktop.MainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         }
 
-        Avalonia.Threading.Dispatcher.UIThread.UnhandledException += (sender, e) =>
+        Avalonia.Threading.Dispatcher.UIThread.UnhandledException += (_, args) =>
         {
-            _logger.LogError(e.Exception, "Unhandled UI exception.");
+            _logger.LogError(args.Exception, "Unhandled UI exception occurred: {Exception}.", args.Exception);
+            args.Handled = true;
         };
 
         base.OnFrameworkInitializationCompleted();
