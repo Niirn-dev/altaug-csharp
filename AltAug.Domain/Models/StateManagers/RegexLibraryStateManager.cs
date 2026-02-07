@@ -10,4 +10,6 @@ public sealed class RegexLibraryStateManager : StateManagerBase<RegexLibraryStor
 
     private RegexLibraryStateManager() : base(LibraryStoreFilePath, RegexLibraryStore.DefaultInstance)
     { }
+
+    protected override RegexLibraryStore Sanitize(RegexLibraryStore state) => state;
 }

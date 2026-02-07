@@ -135,4 +135,10 @@ internal static class ControlsLibrary
         Height = 30,
         Margin = new Thickness(uniformLength: 4),
     };
+
+    public static ScrollViewer MakeScrollViewer(object content) => new()
+    {
+        Content = content,
+        Padding = new Thickness(left: 0, top: 0, right: 14, bottom: 0),
+    };
 }

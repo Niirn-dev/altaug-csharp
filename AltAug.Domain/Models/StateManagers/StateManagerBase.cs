@@ -44,7 +44,7 @@ public abstract class StateManagerBase<TState> : IStateManager<TState>
             try
             {
                 var yaml = File.ReadAllText(_stateFile.FullName);
-                State = _deserializer.Deserialize<TState>(yaml);
+                State = Sanitize(_deserializer.Deserialize<TState>(yaml));
             }
             catch (Exception ex)
             {
@@ -67,4 +67,6 @@ public abstract class StateManagerBase<TState> : IStateManager<TState>
     }
 
     public void Update(Func<TState, TState> updater) => State = updater(State);
+
+    protected abstract TState Sanitize(TState state);
 }

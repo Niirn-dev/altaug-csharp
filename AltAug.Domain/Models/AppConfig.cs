@@ -4,12 +4,17 @@ using AltAug.Domain.Models.Enums;
 namespace AltAug.Domain.Models;
 
 public readonly record struct AppConfig(
+    MainWindowConfig MainWindowConfig,
     CoordinatesConfig CoordinatesConfig,
     AutomationConfig AutomationConfig,
     CraftingConfig CraftingConfig)
 {
     public static AppConfig DefaultInstance { get; } = new(
-        new(
+        MainWindowConfig: new(
+            Height: MainWindowConfig.DefaultHeight,
+            Width: MainWindowConfig.DefaultWidth    
+        ),
+        CoordinatesConfig: new(
             Item: new(0, 0),
             InventorySlotTopLeft: new(0, 0),
             InventorySlotBottomRight: new(0, 0),
@@ -19,12 +24,12 @@ public readonly record struct AppConfig(
             Scour: new(0, 0),
             Chaos: new(0, 0)
         ),
-        new(
+        AutomationConfig: new(
             AutoGuiPause: AutomationConfig.DefaultAutoGuiPause,
             CraftingStartDelay: AutomationConfig.DefaultCraftingStartDelay,
             ScreenResolution: AutomationConfig.DefaultScreenResolution
         ),
-        new(
+        CraftingConfig: new(
             ItemLocationIndex: 0,
             CraftingStrategyIndex: 0,
             ItemsToCraft: CraftingConfig.DefaultItemsToCraft,
@@ -32,6 +37,12 @@ public readonly record struct AppConfig(
             Filters: []
         )
     );
+}
+
+public readonly record struct MainWindowConfig(double Height, double Width)
+{
+    public const double DefaultHeight = 800;
+    public const double DefaultWidth = 800;
 }
 
 public readonly record struct CoordinatesConfig(

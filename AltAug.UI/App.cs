@@ -1,5 +1,7 @@
-﻿using AltAug.Domain.Interfaces;
+﻿using AltAug.Domain.Helpers;
+using AltAug.Domain.Interfaces;
 using AltAug.Domain.Models;
+using AltAug.UI.Elements;
 using AltAug.UI.Extensions;
 using AltAug.UI.Interfaces;
 using Avalonia;
@@ -51,10 +53,12 @@ internal sealed class MainWindow : AppWindow
     {
         _stateManager = stateManager;
 
-        Title = "Alt-Aug C# Edition";
-        Width = 800;
-        Height = 800;
-        CanResize = false;
+        Title = Constants.ApplicationName;
+        Height = _stateManager.State.MainWindowConfig.Height;
+        Width = _stateManager.State.MainWindowConfig.Width;
+        MinHeight = MainWindowConfig.DefaultHeight;
+        MinWidth = MainWindowConfig.DefaultWidth;
+        CanResize = true;
 
         var root = new Grid
         {
@@ -64,7 +68,7 @@ internal sealed class MainWindow : AppWindow
                     Enumerable.Range(0, (views.Count() - 1) * 2)
                         .Select(_ => "Auto")
                         .Append("*"))),
-            Margin = new Thickness(10)
+            Margin = new Thickness(uniformLength: 10)
         };
 
         views.Cast<object>()
@@ -81,10 +85,20 @@ internal sealed class MainWindow : AppWindow
                 }
             });
 
-        Content = new ScrollViewer
-        {
-            Content = root,
-        };
+        Content = ControlsLibrary.MakeScrollViewer(content: root);
+    }
 
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        _stateManager.Update(cfg => cfg with
+        {
+            MainWindowConfig = new()
+            {
+                Height = Height,
+                Width = Width,
+            },
+        });
+
+        base.OnClosing(e);
     }
 }
