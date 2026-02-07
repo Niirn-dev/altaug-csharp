@@ -94,7 +94,7 @@ internal sealed class MainWindow : AppWindow
         {
             MainWindowConfig = new()
             {
-                Height = Height,
+                Height = Height - TitleBar.Height + 1,
                 Width = Width,
             },
         });
