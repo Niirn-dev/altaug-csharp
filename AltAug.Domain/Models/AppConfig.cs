@@ -15,14 +15,14 @@ public readonly record struct AppConfig(
             Width: MainWindowConfig.DefaultWidth    
         ),
         CoordinatesConfig: new(
-            Item: new(0, 0),
-            InventorySlotTopLeft: new(0, 0),
-            InventorySlotBottomRight: new(0, 0),
-            Alteration: new(0, 0),
-            Augmentation: new(0, 0),
-            Alchemy: new(0, 0),
-            Scour: new(0, 0),
-            Chaos: new(0, 0)
+            Item: CoordinatesConfig.DefaultCoordinates,
+            InventorySlotTopLeft: CoordinatesConfig.DefaultCoordinates,
+            InventorySlotBottomRight: CoordinatesConfig.DefaultCoordinates,
+            Alteration: CoordinatesConfig.DefaultCoordinates,
+            Augmentation: CoordinatesConfig.DefaultCoordinates,
+            Alchemy: CoordinatesConfig.DefaultCoordinates,
+            Scour: CoordinatesConfig.DefaultCoordinates,
+            Chaos: CoordinatesConfig.DefaultCoordinates
         ),
         AutomationConfig: new(
             AutoGuiPause: AutomationConfig.DefaultAutoGuiPause,
@@ -53,7 +53,10 @@ public readonly record struct CoordinatesConfig(
     Vec2 Augmentation,
     Vec2 Alchemy,
     Vec2 Scour,
-    Vec2 Chaos);
+    Vec2 Chaos)
+{
+    public static readonly Vec2 DefaultCoordinates = new(0, 0);
+}
 
 public readonly record struct Vec2(double X, double Y)
 {

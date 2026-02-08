@@ -87,6 +87,7 @@ internal sealed partial class ConfigurationView : IView
             MakeDoubleRowConfigBtn(
                 AssetLibrary.GetBowItemBitmap(),
                 (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Item = point } },
+                cfg => cfg.CoordinatesConfig.Item,
                 hoverTarget: "Currency tab's item slot"
             )
         );
@@ -96,26 +97,31 @@ internal sealed partial class ConfigurationView : IView
             MakeSingleRowConfigBtn(
                 AssetLibrary.GetAlterationOrbBitmap(),
                 (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Alteration = point } },
+                cfg => cfg.CoordinatesConfig.Alteration,
                 hoverTarget: "Alteration orb"
             ),
             MakeSingleRowConfigBtn(
                 AssetLibrary.GetAlchemyOrbBitmap(),
                 (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Alchemy = point } },
+                cfg => cfg.CoordinatesConfig.Alchemy,
                 hoverTarget: "Alchemy orb"
             ),
             MakeSingleRowConfigBtn(
                 AssetLibrary.GetAugmentationOrbBitmap(),
                 (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Augmentation = point } },
+                cfg => cfg.CoordinatesConfig.Augmentation,
                 hoverTarget: "Augmentation orb"
             ),
             MakeSingleRowConfigBtn(
                 AssetLibrary.GetScouringOrbBitmap(),
                 (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Scour = point } },
+                cfg => cfg.CoordinatesConfig.Scour,
                 hoverTarget: "Scouring orb"
             ),
             MakeSingleRowConfigBtn(
                 AssetLibrary.GetChaosOrbBitmap(),
                 (cfg, point) => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { Chaos = point } },
+                cfg => cfg.CoordinatesConfig.Chaos,
                 hoverTarget: "Chaos orb"
             ),
             MakeMapConfigurationBtn(),
@@ -229,6 +235,19 @@ internal sealed partial class ConfigurationView : IView
 
     private Button MakeMapConfigurationBtn()
     {
+        IBrush? GetBorderBrush()
+        {
+            var isFirstDefault = _appManager.State.CoordinatesConfig.InventorySlotTopLeft == CoordinatesConfig.DefaultCoordinates;
+            var isSecondDefault = _appManager.State.CoordinatesConfig.InventorySlotBottomRight == CoordinatesConfig.DefaultCoordinates;
+
+            return (isFirstDefault, isSecondDefault) switch
+            {
+                (true, true) => Brushes.DarkRed,
+                (true, false) or (false, true) => Brushes.DarkOrange,
+                _ => null,
+            };
+        }
+
         var btn = new Button
         {
             Content = new Image
@@ -240,6 +259,8 @@ internal sealed partial class ConfigurationView : IView
             Width = ConfigurationButtonWidth,
             Margin = new Thickness(2),
             Padding = new Thickness(0),
+
+            BorderBrush = GetBorderBrush(),
         };
 
         btn.Click += async (src, args) =>
@@ -251,6 +272,11 @@ internal sealed partial class ConfigurationView : IView
                 {
                     LogInfoCursorPosition(point.X, point.Y);
                     _appManager.Update(cfg => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { InventorySlotTopLeft = point } });
+
+                    if (src is Button b)
+                    {
+                        b.BorderBrush = GetBorderBrush();
+                    }
                 },
                 () => LogInfoCursorPositionNotRecorded()
             );
@@ -264,6 +290,11 @@ internal sealed partial class ConfigurationView : IView
                 {
                     LogInfoCursorPosition(point.X, point.Y);
                     _appManager.Update(cfg => cfg with { CoordinatesConfig = cfg.CoordinatesConfig with { InventorySlotBottomRight = point } });
+
+                    if (src is Button b)
+                    {
+                        b.BorderBrush = GetBorderBrush();
+                    }
                 },
                 () => LogInfoCursorPositionNotRecorded()
             );
@@ -272,22 +303,42 @@ internal sealed partial class ConfigurationView : IView
         return btn;
     }
 
-    private Button MakeDoubleRowConfigBtn(Bitmap imageSource, Func<AppConfig, Vec2, AppConfig> configUpdater, string hoverTarget) => MakeConfigurationButton(
-        imageSource,
-        height: ConfigurationButtonDoubleRowHeight,
-        width: ConfigurationButtonWidth,
-        configUpdater,
-        hoverTarget);
+    private Button MakeDoubleRowConfigBtn(
+        Bitmap imageSource,
+        Func<AppConfig, Vec2, AppConfig> configUpdater,
+        Func<AppConfig, Vec2> configValueGetter,
+        string hoverTarget) => MakeConfigurationButton(
+            imageSource,
+            height: ConfigurationButtonDoubleRowHeight,
+            width: ConfigurationButtonWidth,
+            configUpdater,
+            configValueGetter,
+            hoverTarget);
 
-    private Button MakeSingleRowConfigBtn(Bitmap imageSource, Func<AppConfig, Vec2, AppConfig> configUpdater, string hoverTarget) => MakeConfigurationButton(
-        imageSource,
-        height: ConfigurationButtonSingleRowHeight,
-        width: ConfigurationButtonWidth,
-        configUpdater,
-        hoverTarget);
+    private Button MakeSingleRowConfigBtn(
+        Bitmap imageSource,
+        Func<AppConfig, Vec2, AppConfig> configUpdater,
+        Func<AppConfig, Vec2> configValueGetter,
+        string hoverTarget) => MakeConfigurationButton(
+            imageSource,
+            height: ConfigurationButtonSingleRowHeight,
+            width: ConfigurationButtonWidth,
+            configUpdater,
+            configValueGetter,
+            hoverTarget);
 
-    private Button MakeConfigurationButton(Bitmap imageSource, int height, int width, Func<AppConfig, Vec2, AppConfig> configUpdater, string hoverTarget)
+    private Button MakeConfigurationButton(
+        Bitmap imageSource,
+        int height,
+        int width,
+        Func<AppConfig, Vec2, AppConfig> configUpdater,
+        Func<AppConfig, Vec2> configValueGetter,
+        string hoverTarget)
     {
+         static IBrush? GetBorderBrush(Vec2 value) => value == CoordinatesConfig.DefaultCoordinates
+            ? Brushes.DarkRed
+            : null;
+
         var btn = new Button
         {
             Content = new Image
@@ -297,8 +348,11 @@ internal sealed partial class ConfigurationView : IView
             },
             Height = height,
             Width = width,
-            Margin = new Thickness(2),
-            Padding = new Thickness(0),
+            Margin = new Thickness(uniformLength: 2),
+            Padding = new Thickness(uniformLength: 0),
+
+            BorderThickness = new Thickness(uniformLength: 2),
+            BorderBrush = GetBorderBrush(configValueGetter(_appManager.State)),
         };
 
         btn.Click += async (src, args) =>
@@ -310,6 +364,11 @@ internal sealed partial class ConfigurationView : IView
                 {
                     LogInfoCursorPosition(point.X, point.Y);
                     _appManager.Update(cfg => configUpdater(cfg, point));
+
+                    if (src is Button b)
+                    {
+                        b.BorderBrush = GetBorderBrush(point);
+                    }
                 },
                 () => LogInfoCursorPositionNotRecorded()
             );
