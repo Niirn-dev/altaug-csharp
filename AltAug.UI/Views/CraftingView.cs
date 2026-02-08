@@ -143,7 +143,7 @@ internal sealed class CraftingView : IView
             var itemLocation = ((string?)_itemLocationComboBox.SelectedValue)
                 .ToOpt()
                 .Match(
-                    s => s.ParseEnum<ItemLocation>(),
+                    s => s.ParseEnum<ItemLocation>(ignoreCase: true),
                     () => Option<ItemLocation>.None
                 )
                 .IfNone(ItemLocation.CurrencyTab);
@@ -153,7 +153,9 @@ internal sealed class CraftingView : IView
                 _ => Option<int>.None,
             };
 
-            var itemsCount = (int?)_itemCountUpDown.Value ?? CraftingConfig.DefaultItemsToCraft;
+            var itemsCount = itemLocation is ItemLocation.Inventory 
+                ? (int?)_itemCountUpDown.Value ?? CraftingConfig.DefaultItemsToCraft
+                : 1;
             var maxAttempts = (int?)_currencyUsedUpDown.Value ?? CraftingConfig.DefaultCurrencyToUseCount;
             var locationParams = new ItemLocationParams(itemLocation, inventoryPosition, Option<Vec2>.None);
 

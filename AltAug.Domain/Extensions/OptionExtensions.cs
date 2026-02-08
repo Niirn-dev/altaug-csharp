@@ -16,9 +16,9 @@ public static class OptionExtensions
         return that;
     }
 
-    public static Option<TEnum> ParseEnum<TEnum>(this string that)
+    public static Option<TEnum> ParseEnum<TEnum>(this string that, bool ignoreCase)
         where TEnum : struct, Enum
-        => Enum.TryParse<TEnum>(that, out var enumValue)
+        => Enum.TryParse<TEnum>(that, ignoreCase, out var enumValue)
             ? enumValue
             : Option<TEnum>.None;
 }

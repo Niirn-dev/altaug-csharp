@@ -6,7 +6,8 @@ public readonly record struct AffixFilterParameters(
     string NameFilter,
     string DescriptionFilter,
     int MaxTierFilter,
-    bool IsTierFilterEnabled) : IFilterParams;
+    bool IsTierFilterEnabled,
+    AffixType AffixTypeFilter) : IFilterParams;
 
 public readonly record struct OpenPrefixFilterParameters() : IFilterParams;
 

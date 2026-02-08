@@ -1,11 +1,13 @@
 ﻿using AltAug.Domain.Extensions;
 using AltAug.Domain.Interfaces;
+using AltAug.Domain.Models;
 using AltAug.Domain.Models.Filters;
 using AltAug.UI.Extensions;
 using AltAug.UI.Interfaces;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using LanguageExt;
+using MoreLinq;
 
 namespace AltAug.UI.Elements.FilterControls;
 
@@ -30,6 +32,8 @@ internal sealed class AffixFilterControl : IFilterControl<AffixFilter>
     private readonly TextBox _inputTextBox_Description;
     private readonly NumericUpDown _inputUpDown_Tier;
 
+    private readonly ComboBox _inputAffixTypeComboBox;
+
     public bool IsRemoved { get; private set; } = false;
     public IFilterParams Parameters
     {
@@ -37,7 +41,8 @@ internal sealed class AffixFilterControl : IFilterControl<AffixFilter>
             NameFilter: _inputTextBox_Name.Text ?? string.Empty,
             DescriptionFilter: _inputTextBox_Description.Text ?? string.Empty,
             MaxTierFilter: (int?)_inputUpDown_Tier.Value ?? DefaultMaxTierValue,
-            IsTierFilterEnabled: _inputHeaderTierEnabledCheckBox.IsChecked is true);
+            IsTierFilterEnabled: _inputHeaderTierEnabledCheckBox.IsChecked is true,
+            AffixTypeFilter: SelectedAffixType.IfNone(AffixType.Any));
     }
 
     private Option<int> SelectedMaxTier
@@ -51,6 +56,19 @@ internal sealed class AffixFilterControl : IFilterControl<AffixFilter>
         }
     }
 
+    private Option<AffixType> SelectedAffixType
+    {
+        get
+        {
+            if (_inputAffixTypeComboBox.SelectedItem is not string affixTypeString)
+                return Option<AffixType>.None;
+
+            return affixTypeString
+                .ParseEnum<AffixType>(ignoreCase: true)
+                .Bind(t => t is AffixType.Any ? Option<AffixType>.None : t);
+        }
+    }
+
     public AffixFilterControl()
     {
         // Initialize controls
@@ -59,7 +77,7 @@ internal sealed class AffixFilterControl : IFilterControl<AffixFilter>
         _mainGrid = new()
         {
             ColumnDefinitions = ColumnDefinitions.Parse("*, 2*, Auto"),
-            RowDefinitions = RowDefinitions.Parse("Auto, Auto, Auto"),
+            RowDefinitions = RowDefinitions.Parse("Auto, Auto, Auto, Auto"),
             HorizontalAlignment = HorizontalAlignment.Stretch,
         };
 
@@ -77,6 +95,11 @@ internal sealed class AffixFilterControl : IFilterControl<AffixFilter>
         _inputTextBox_Description = ControlsLibrary.MakeTextBox(text: string.Empty);
         _inputUpDown_Tier = ControlsLibrary.MakeIntUpDown(value: 1);
 
+        _inputAffixTypeComboBox = ControlsLibrary.MakeAutoWidthComboBox();
+        Enum.GetNames<AffixType>()
+            .ForEach(n => _inputAffixTypeComboBox.Items.Add(n));
+        _inputAffixTypeComboBox.SelectedItem = AffixType.Any.ToString();
+
         // Define layout
         _mainGrid
             .AddControl(_titleText, row: 0, column: 0)
@@ -86,7 +109,8 @@ internal sealed class AffixFilterControl : IFilterControl<AffixFilter>
             .AddControl(_inputHeaderTierEnabledCheckBox, row: 1, column: 2)
             .AddControl(_inputTextBox_Name, row: 2, column: 0)
             .AddControl(_inputTextBox_Description, row: 2, column: 1)
-            .AddControl(_inputUpDown_Tier, row: 2, column: 2);
+            .AddControl(_inputUpDown_Tier, row: 2, column: 2)
+            .AddControl(_inputAffixTypeComboBox, row: 3, column: 0);
 
         _root.Child = _mainGrid;
     }
@@ -100,6 +124,7 @@ internal sealed class AffixFilterControl : IFilterControl<AffixFilter>
         _inputTextBox_Description.Text = parameters.DescriptionFilter;
         _inputUpDown_Tier.Value = parameters.MaxTierFilter;
         _inputHeaderTierEnabledCheckBox.IsChecked = parameters.IsTierFilterEnabled;
+        _inputAffixTypeComboBox.SelectedItem = parameters.AffixTypeFilter.ToString();
     }
 
     public void AddTo(Controls controls)
@@ -116,5 +141,6 @@ internal sealed class AffixFilterControl : IFilterControl<AffixFilter>
     public IFilter MakeFilter() => new AffixFilter(
         nameFilter: _inputTextBox_Name.Text.ToOpt(treatEmptyAsNone: true),
         descriptionFilter: _inputTextBox_Description.Text.ToOpt(treatEmptyAsNone: true),
-        maxTierFilter: SelectedMaxTier);
+        maxTierFilter: SelectedMaxTier,
+        affixTypes: SelectedAffixType);
 }
